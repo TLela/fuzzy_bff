@@ -5,10 +5,15 @@
 #include <stdlib.h>
 #include <vector>
 #include "hashfunction.h"
+#include <unordered_set>
 
 
 using namespace std;
 
+// TODO - implement LSH class and instances
+uint64_t lsh_hash(uint64_t key){
+    return key;
+}
 
 template <typename ItemType, typename FingerprintType, typename HashFamily>
 class fuzzyBFF {
@@ -106,6 +111,18 @@ bool fuzzyBFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* d
         return false;
     }
 
+    // Map keys with LSH
+    // Get rid of duplicates
+    // TODO: consider efficiency of this step with unordered set
+    std::unordered_set<uint64_t> keys;
+    for (size_t i = 0; i < length; i++){
+        keys.insert(lsh_hash(data[i]));
+    }
+    std::vector<uint64_t> data_new(keys.begin(), keys.end());
+    
+    size = data_new.size();
+    length = size;
+
     // Initialize arrays for array C
     // First mapping of values to their positions in the filter
     uint64_t *arrayC_hash = new uint64_t[filterLength];
@@ -138,7 +155,7 @@ bool fuzzyBFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* d
         // to sets in array C corresponding to h_0(x), h_1(x), h_2(x). 
         // Increase counter accordingly.
         for(size_t i = 0; i < length; i++){
-            uint64_t key = data[i];
+            uint64_t key = data_new[i];
             uint64_t hash = (*hashfunction)(key);
             for (int hi = 0; hi < 3; hi++){
                 size_t index = getHashFromHash(hash, hi);
