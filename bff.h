@@ -1,5 +1,5 @@
-#ifndef fuzzyBFF_H
-#define fuzzyBFF_H
+#ifndef BFF_H
+#define BFF_H
 
 // Include necessary standard libraries
 #include <stdlib.h>
@@ -9,12 +9,11 @@
 
 using namespace std;
 
-
 template <typename ItemType, typename FingerprintType, typename HashFamily>
-class fuzzyBFF {
+class BFF {
 public:
     // Constructor
-    fuzzyBFF(const size_t size){
+    BFF(const size_t size){
         // TODO: Have different values than their implementation (they add the 2 segments not always addiitonally but within the additional array size already considered I think...)
         // Calculate all necessary parameters to setup filter
         this->size = size;
@@ -47,7 +46,7 @@ public:
     }
 
     // Destructor
-    ~fuzzyBFF();
+    ~BFF();
 
     // Public member functions
     // Populate with data in vector data
@@ -93,13 +92,13 @@ public:
 };
 
 template <typename ItemType, typename FingerprintType, typename HashFamily>
-fuzzyBFF<ItemType, FingerprintType, HashFamily>::~fuzzyBFF() {
+BFF<ItemType, FingerprintType, HashFamily>::~BFF() {
     delete[] this->filter;
     delete this->hashfunction;
 }
 
 template <typename ItemType, typename FingerprintType, typename HashFamily>
-bool fuzzyBFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, size_t length){
+bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, size_t length){
 
     // Check if the filter is big enough to hold the data
     if (length > this->size) {
@@ -250,7 +249,7 @@ bool fuzzyBFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* d
 }
 
 template <typename ItemType, typename FingerprintType, typename HashFamily>
-bool fuzzyBFF <ItemType, FingerprintType, HashFamily>::membership(ItemType &item) {
+bool BFF <ItemType, FingerprintType, HashFamily>::membership(ItemType &item) {
 
     uint64_t hash = (*hashfunction)(item);
     FingerprintType xor2 = (FingerprintType)hash;
@@ -264,4 +263,4 @@ bool fuzzyBFF <ItemType, FingerprintType, HashFamily>::membership(ItemType &item
     return xor2 == 0;
 }
 
-#endif // fuzzyBFF_H
+#endif // BFF_H
