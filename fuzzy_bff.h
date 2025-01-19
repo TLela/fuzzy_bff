@@ -78,7 +78,7 @@ public:
         return h % (this->filterLength);
     }
 
-    bool membership();
+    bool membership(ItemType &item);
 
     // Public member variables
     // TODO: make private after testing?
@@ -187,7 +187,8 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
                     // Check if we are at the original location
                     // In this case we store the hi value for later use
                     if(index3 == index){
-                        stackP_hi[stackP_pos] = hi; 
+                        stackP_hi[stackP_pos] = hi;
+                        continue; 
                     }
                     // Check if we have a new singleton
                     else if(arrayC_count[index3] == 2){
@@ -250,16 +251,6 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
     delete[] arrayC_hash;
 
     return true;
-
-    // // populate filter trivial test
-    // for (size_t i = 0; i < length; i++) {
-    //     uint64_t hash = (*hashfunction)(data[i]);
-    //     this->filter[3*i] = getHashFromHash(hash, 0)& (filterLength - 1);
-    //     this->filter[3*i+1] = getHashFromHash(hash, 1)& (filterLength - 1);
-    //     this->filter[3*i+2] = getHashFromHash(hash, 2)& (filterLength - 1);
-    // }
-    // //change
-    // return true;
 }
 
 template <typename ItemType, typename FingerprintType, typename HashFamily>
@@ -268,6 +259,19 @@ BFF<ItemType, FingerprintType, HashFamily>::~BFF() {
     delete this->hashfunction;
 }
 
+template <typename ItemType, typename FingerprintType, typename HashFamily>
+bool BFF <ItemType, FingerprintType, HashFamily>::membership(ItemType &item) {
 
+    uint64_t hash = (*hashfunction)(item);
+    FingerprintType xor2 = (FingerprintType)hash;
+
+    // TODO: want to make it faster? inline the function call and combine for all three hi values
+    for(int hi = 0; hi < 3; hi++){
+        size_t h = getHashFromHash(hash, hi);
+        xor2 ^= filter[h];
+    }
+    
+    return xor2 == 0;
+}
 
 #endif // BFF_H
