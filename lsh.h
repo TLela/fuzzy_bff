@@ -1,17 +1,17 @@
 #ifndef LSH_H
 #define LSH_H
 
-#include <vector>
 
+template <typename InputType, typename ItemType>
 class LSH {
 public:
-    LSH();
-    ~LSH();
-
-    
-
-private:
-
+    LSH() {
+    }
+    virtual ~LSH() {
+    }
+    virtual ItemType hashed(const InputType& input) {
+        return input;
+    }
 };
 
 #endif // LSH_H
