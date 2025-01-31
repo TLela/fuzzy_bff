@@ -136,11 +136,11 @@ bool fuzzyBFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* d
     // Map keys with LSH
     // Get rid of duplicates
     // TODO: consider efficiency of this step with unordered set
-    std::unordered_set<uint64_t> keys;
+    std::unordered_set<ItemType> keys;
     for (size_t i = 0; i < length; i++){
         keys.insert(lsh_hash(data[i]));
     }
-    std::vector<uint64_t> data_new(keys.begin(), keys.end());
+    std::vector<ItemType> data_new(keys.begin(), keys.end());
     
     this->size = data_new.size();
     length = data_new.size();
