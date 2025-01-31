@@ -12,54 +12,35 @@ using namespace std;
 
 // TODO - implement LSH class and instances
 uint64_t lsh_hash(uint64_t key){
-    return key;
+    if(key % 2 != 0){
+        return key - 1;
+    }
+    else{
+        return key;
+    }
 }
 
 template <typename ItemType, typename FingerprintType, typename HashFamily>
 class fuzzyBFF {
 public:
     // Constructor
-    fuzzyBFF(const size_t size){
-        // TODO: Have different values than their implementation (they add the 2 segments not always addiitonally but within the additional array size already considered I think...)
-        // Calculate all necessary parameters to setup filter
-        this->size = size;
-        this->segmentLength = 1L << (int)floor(log(size) / log(3.33) + 2.25);
-
-        // TODO: check why/if needed
-        if (this->segmentLength > (1 << 18)) {
-            this->segmentLength = (1 << 18);
-        }
-
-        // Filter needs to be bigger than size of input set
-        double factor = fmax(1.125, 0.875 + 0.25 * log(1000000) / log(size));
-        printf("factor: %f\n", factor);
-        this->filterLength = factor * size;
-        printf("filterLength: %lu\n", this->filterLength);
-
-        // We need to fit an integer number of segments in the filter
-        this->segmentCount = ((this->filterLength + this->segmentLength - 1) / this->segmentLength);
-
-        // TODO: decide what to do for small sizes. what if less than 3 segments are needed?
-
-        // Size of the logical filter array
-        this->filterLength = this->segmentCount * this->segmentLength;
-        // We wrap around the last two segments to ensure uniform randomness of hash positions of elements
-        // This is done by adding two additional segments at the end of the filter - these correspond to the first two segments
-        this->segmentCount += 2;
-        this->arrayLength = this->segmentCount * this->segmentLength;
-
-        // Allocate memory for filter
-        this->filter = new FingerprintType[this->filterLength]();
-        std::fill_n(this->filter, this->filterLength, 0);
-
-        // Initialize hash function
-        this->hashfunction = new HashFamily();
+    fuzzyBFF(){
+        this-> size = 0;
+        this-> segmentLength = 0;
+        this-> arrayLength = 0;
+        this-> filterLength = 0;
+        this-> segmentCount = 0;
+        this-> hashfunction = new HashFamily();
+        this-> filter = nullptr;
     }
 
     // Destructor
     ~fuzzyBFF();
 
+    //////////////////////////
     // Public member functions
+    //////////////////////////
+
     // Populate with data in vector data
     bool populate(const vector<ItemType>& data, size_t length){
         return  populate(data.data(), length);
@@ -105,6 +86,42 @@ public:
     // Filter array
     FingerprintType* filter;
 
+private:
+    // Initialize the filter
+    inline __attribute__((always_inline)) void initFilter(){
+        // TODO: Have different values than their implementation (they add the 2 segments not always additonally but within the additional array size already considered I think...)
+        // Calculate all necessary parameters to setup filter
+        
+        this->segmentLength = 1L << (int)floor(log(size) / log(3.33) + 2.25);
+
+        // TODO: check why/if needed
+        if (this->segmentLength > (1 << 18)) {
+            this->segmentLength = (1 << 18);
+        }
+
+        // Filter needs to be bigger than size of input set
+        double factor = fmax(1.125, 0.875 + 0.25 * log(1000000) / log(size));
+        this->filterLength = factor * size;
+
+        // We need to fit an integer number of segments in the filter
+        this->segmentCount = ((this->filterLength + this->segmentLength - 1) / this->segmentLength);
+
+        // TODO: decide what to do for small sizes. what if less than 3 segments are needed?
+
+        // Size of the logical filter array
+        this->filterLength = this->segmentCount * this->segmentLength;
+        // We wrap around the last two segments to ensure uniform randomness of hash positions of elements
+        // This is done by adding two additional segments at the end of the filter - these correspond to the first two segments
+        this->segmentCount += 2;
+        this->arrayLength = this->segmentCount * this->segmentLength;
+
+        // Allocate memory for filter
+        this->filter = new FingerprintType[this->filterLength]();
+        std::fill_n(this->filter, this->filterLength, 0);
+
+        // Initialize hash function
+        this->hashfunction = new HashFamily();
+    }
 };
 
 template <typename ItemType, typename FingerprintType, typename HashFamily>
@@ -116,11 +133,6 @@ fuzzyBFF<ItemType, FingerprintType, HashFamily>::~fuzzyBFF() {
 template <typename ItemType, typename FingerprintType, typename HashFamily>
 bool fuzzyBFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, size_t length){
 
-    // Check if the filter is big enough to hold the data
-    if (length > this->size) {
-        return false;
-    }
-
     // Map keys with LSH
     // Get rid of duplicates
     // TODO: consider efficiency of this step with unordered set
@@ -130,8 +142,11 @@ bool fuzzyBFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* d
     }
     std::vector<uint64_t> data_new(keys.begin(), keys.end());
     
-    size = data_new.size();
-    length = size;
+    this->size = data_new.size();
+    length = data_new.size();
+
+    // Initialize filter
+    initFilter();
 
     // Initialize arrays for array C
     // First mapping of values to their positions in the filter
