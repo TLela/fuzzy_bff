@@ -19,6 +19,10 @@ public:
         this->size = size;
         this->segmentLength = 1L << (int)floor(log(size) / log(3.33) + 2.25);
 
+        // TODO: check why/if needed
+        if (this->segmentLength > (1 << 18)) {
+            this->segmentLength = (1 << 18);
+        }
         // Filter needs to be bigger than size of input set
         double factor = fmax(1.125, 0.875 + 0.25 * log(1000000) / log(size));
         printf("factor: %f\n", factor);
@@ -75,7 +79,13 @@ public:
         return h % (this->filterLength);
     }
 
+
     bool membership(ItemType &item);
+
+    //get hashfunction for debugging
+    HashFamily* getHashFunction(){
+        return this->hashfunction;
+    }
 
     // Public member variables
     // TODO: make private after testing?
@@ -205,6 +215,9 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
             printf("Construction successful\n");
             break;
         }
+        else{
+            printf("Construction failed, retrying...\n");
+        }
 
         // If not, generate new hash functions
         delete hashfunction;
@@ -228,11 +241,14 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
         // Get the hash corresponding to the location
         uint64_t hash = arrayC_hash[index];
 
+        // Get the hi value corresponding to the location
+        int hi_found = stackP_hi[stackP_pos];
+
         // Caclulate xor value
         xor2 = (FingerprintType)hash;
         size_t index3 = 0;
         for(int hi = 0; hi < 3; hi++){
-            if(hi != index){
+            if(hi != hi_found){
                 // xor the filter value at the location h_hi(x)
                 index3 = getHashFromHash(hash, hi);
                 xor2 ^= filter[index3];
