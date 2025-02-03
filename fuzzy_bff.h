@@ -6,32 +6,27 @@
 #include <vector>
 #include "hashfunction.h"
 #include <unordered_set>
-
+#include "lsh.h"
+#include "examplelsh.h"
 
 using namespace std;
 
-// TODO - implement LSH class and instances
-uint64_t lsh_hash(uint64_t key){
-    if(key % 2 != 0){
-        return key - 1;
-    }
-    else{
-        return key;
-    }
-}
-
-template <typename ItemType, typename FingerprintType, typename HashFamily>
+template <typename InputType, typename ItemType, typename FingerprintType, typename HashFamily, typename LSHType>
 class fuzzyBFF {
 public:
     // Constructor
-    fuzzyBFF(){
-        this-> size = 0;
-        this-> segmentLength = 0;
-        this-> arrayLength = 0;
-        this-> filterLength = 0;
-        this-> segmentCount = 0;
-        this-> hashfunction = new HashFamily();
-        this-> filter = nullptr;
+    fuzzyBFF() {
+
+        //Check if LSHType InputType and ItemType are compatible with fuzzyBFF InputType and ItemType
+        static_assert(std::is_base_of<LSH<InputType, ItemType>, LSHType>::value, "LSHType must be derived from LSH<InputType, ItemType>");
+
+        this->size = 0;
+        this->segmentLength = 0;
+        this->arrayLength = 0;
+        this->filterLength = 0;
+        this->segmentCount = 0;
+        this->hashfunction = new HashFamily();
+        this->filter = nullptr;
     }
 
     // Destructor
@@ -42,21 +37,20 @@ public:
     //////////////////////////
 
     // Populate with data in vector data
-    bool populate(const vector<ItemType>& data, size_t length){
-        return  populate(data.data(), length);
+    bool populate(const vector<InputType>& data, size_t length) {
+        return populate(data.data(), length);
     }
 
     // Populate with data in array data
-    bool populate(const ItemType* data, size_t length);
+    bool populate(const InputType* data, size_t length);
 
     // Get pointer to filter
-    FingerprintType* getFilter(){
+    FingerprintType* getFilter() {
         return this->filter;
     }
 
     // See https://github.com/FastFilter/fastfilter_cpp
-    inline __attribute__((always_inline)) size_t getHashFromHash(uint64_t hash,
-                                                               int index) {
+    inline __attribute__((always_inline)) size_t getHashFromHash(uint64_t hash, int index) {
         __uint128_t x = (__uint128_t)hash * (__uint128_t)(this->filterLength);
         uint64_t h = (uint64_t)(x >> 64);
         h += index * this->segmentLength;
@@ -67,10 +61,10 @@ public:
         return h % (this->filterLength);
     }
 
-    bool membership(ItemType &item);
+    bool membership(InputType& item);
 
     //get hashfunction for debugging
-    HashFamily* getHashFunction(){
+    HashFamily* getHashFunction() {
         return this->hashfunction;
     }
 
@@ -81,14 +75,17 @@ public:
     size_t arrayLength;
     size_t filterLength;
     size_t segmentCount;
-    HashFamily *hashfunction;
+    HashFamily* hashfunction;
 
     // Filter array
     FingerprintType* filter;
 
 private:
+//TODO: need to initialize sth for some cases? 
+    LSHType lsh;
+
     // Initialize the filter
-    inline __attribute__((always_inline)) void initFilter(){
+    inline __attribute__((always_inline)) void initFilter() {
         // TODO: Have different values than their implementation (they add the 2 segments not always additonally but within the additional array size already considered I think...)
         // Calculate all necessary parameters to setup filter
         
@@ -124,21 +121,21 @@ private:
     }
 };
 
-template <typename ItemType, typename FingerprintType, typename HashFamily>
-fuzzyBFF<ItemType, FingerprintType, HashFamily>::~fuzzyBFF() {
+template <typename InputType, typename ItemType, typename FingerprintType, typename HashFamily, typename LSHType>
+fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::~fuzzyBFF() {
     delete[] this->filter;
     delete this->hashfunction;
 }
 
-template <typename ItemType, typename FingerprintType, typename HashFamily>
-bool fuzzyBFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, size_t length){
+template <typename InputType, typename ItemType, typename FingerprintType, typename HashFamily, typename LSHType>
+bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::populate(const InputType* data, size_t length) {
 
     // Map keys with LSH
     // Get rid of duplicates
     // TODO: consider efficiency of this step with unordered set
-    std::unordered_set<ItemType> keys;
-    for (size_t i = 0; i < length; i++){
-        keys.insert(lsh_hash(data[i]));
+    std::unordered_set<InputType> keys;
+    for (size_t i = 0; i < length; i++) {
+        keys.insert(lsh.hashed(data[i]));
     }
     std::vector<ItemType> data_new(keys.begin(), keys.end());
     
@@ -150,20 +147,20 @@ bool fuzzyBFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* d
 
     // Initialize arrays for array C
     // First mapping of values to their positions in the filter
-    uint64_t *arrayC_hash = new uint64_t[filterLength];
-    uint64_t *arrayC_count = new uint64_t[filterLength];
+    uint64_t* arrayC_hash = new uint64_t[filterLength];
+    uint64_t* arrayC_count = new uint64_t[filterLength];
 
     // Initialize arrays for stack Q
     // Stack of singletons
-    size_t *stackQ = new size_t[filterLength];
+    size_t* stackQ = new size_t[filterLength];
 
     // Initialize counters for stack Q
     size_t stackQ_pos = 0;
 
     // Initialize arrays for stack P
     // Stack of hash/index pairs in order of detection
-    size_t *stackP_index = new size_t[filterLength];
-    uint8_t *stackP_hi = new uint8_t[filterLength];
+    size_t* stackP_index = new size_t[filterLength];
+    uint8_t* stackP_hi = new uint8_t[filterLength];
 
     // Initialize counters for stack P
     size_t stackP_pos = 0;
@@ -172,47 +169,40 @@ bool fuzzyBFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* d
     FingerprintType xor2 = 0;
 
     
-    while(true){
+    while (true) {
         memset(arrayC_hash, 0, sizeof(uint64_t[filterLength]));
         memset(arrayC_count, 0, sizeof(size_t[filterLength]));
 
         // Scan through keys in set and add hashes of x 
         // to sets in array C corresponding to h_0(x), h_1(x), h_2(x). 
         // Increase counter accordingly.
-        for(size_t i = 0; i < length; i++){
+        for (size_t i = 0; i < length; i++) {
             uint64_t key = data_new[i];
             uint64_t hash = (*hashfunction)(key);
-            for (int hi = 0; hi < 3; hi++){
+            for (int hi = 0; hi < 3; hi++) {
                 size_t index = getHashFromHash(hash, hi);
                 arrayC_hash[index] ^= hash;
                 arrayC_count[index]++;
             }
-            // printf("arrayC_count: ");
-            // for(size_t i = 0; i < filterLength; i++){
-            //     printf("%llu ", arrayC_count[i]);
-            // }
-            // printf("  For hash value: %llu\n", hash);
-            // printf("\n");
         }
 
         // Scan through array C and add singletons to stack Q
-        for(size_t i = 0; i < filterLength; i++){
-            if(arrayC_count[i] == 1){
+        for (size_t i = 0; i < filterLength; i++) {
+            if (arrayC_count[i] == 1) {
                 stackQ[stackQ_pos++] = i;
             }
         }
         
 
         // Go through stack Q and add singletons to stack P
-        while(stackQ_pos > 0){
+        while (stackQ_pos > 0) {
             stackQ_pos--;
 
             // Pop location from stack Q
             size_t index = stackQ[stackQ_pos];
 
-
             // Check if we still have an element at this location
-            if(arrayC_count[index]==1){
+            if (arrayC_count[index] == 1) {
                 // Get the hash corresponding to the singleton at position index
                 uint64_t hash = arrayC_hash[index];
 
@@ -220,16 +210,16 @@ bool fuzzyBFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* d
                 stackP_index[stackP_pos] = index;
 
                 // Decrement counters of the three locations in array C
-                for(int hi = 0; hi < 3; hi++){
+                for (int hi = 0; hi < 3; hi++) {
                     size_t index3 = getHashFromHash(hash, hi);
                     // Check if we are at the original location
                     // In this case we store the hi value for later use
-                    if(index3 == index){
+                    if (index3 == index) {
                         stackP_hi[stackP_pos] = hi;
                         continue; 
                     }
                     // Check if we have a new singleton
-                    else if(arrayC_count[index3] == 2){
+                    else if (arrayC_count[index3] == 2) {
                         stackQ[stackQ_pos++] = index3;
                     }
                     // Decrement counter
@@ -240,15 +230,13 @@ bool fuzzyBFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* d
                 // Increase stack P position
                 stackP_pos++;
             }
-            
         }
 
         // Check if construction was successful
-        if (stackP_pos == size){
+        if (stackP_pos == size) {
             printf("Construction successful\n");
             break;
-        }
-        else{
+        } else {
             printf("Construction failed, retrying...\n");
         }
 
@@ -265,7 +253,7 @@ bool fuzzyBFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* d
     delete[] stackQ;
 
     // Populate filter
-    while(stackP_pos > 0){
+    while (stackP_pos > 0) {
         stackP_pos--;
 
         // Pop location from stack P
@@ -277,12 +265,12 @@ bool fuzzyBFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* d
         // Get the hi value corresponding to the location
         int hi_found = stackP_hi[stackP_pos];
 
-        // Caclulate xor value
+        // Calculate xor value
         xor2 = (FingerprintType)hash;
 
         size_t index3 = 0;
-        for(int hi = 0; hi < 3; hi++){
-            if(hi != hi_found){
+        for (int hi = 0; hi < 3; hi++) {
+            if (hi != hi_found) {
                 // xor the filter value at the location h_hi(x)
                 index3 = getHashFromHash(hash, hi);
                 xor2 ^= filter[index3];
@@ -298,14 +286,15 @@ bool fuzzyBFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* d
     return true;
 }
 
-template <typename ItemType, typename FingerprintType, typename HashFamily>
-bool fuzzyBFF <ItemType, FingerprintType, HashFamily>::membership(ItemType &item) {
+template <typename InputType, typename ItemType, typename FingerprintType, typename HashFamily, typename LSHType>
+bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::membership(InputType& item) {
 
-    uint64_t hash = (*hashfunction)(item);
+    ItemType lsh_item = lsh.hashed(item);
+    uint64_t hash = (*hashfunction)(lsh_item);
     FingerprintType xor2 = (FingerprintType)hash;
 
     // TODO: want to make it faster? inline the function call and combine for all three hi values
-    for(int hi = 0; hi < 3; hi++){
+    for (int hi = 0; hi < 3; hi++) {
         size_t h = getHashFromHash(hash, hi);
         xor2 ^= filter[h];
     }
@@ -313,4 +302,4 @@ bool fuzzyBFF <ItemType, FingerprintType, HashFamily>::membership(ItemType &item
     return xor2 == 0;
 }
 
-#endif // fuzzyBFF_H
+#endif // FUZZY_BFF_H

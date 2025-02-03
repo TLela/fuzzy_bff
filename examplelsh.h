@@ -2,13 +2,21 @@
 #define EXAMPLELSH_H
 
 #include "lsh.h"
+#include <stdlib.h>
 
-class examplelsh : public LSH {
+class ExampleLSH : public LSH<uint64_t, uint64_t> {
 public:
-    examplelsh();
-    ~examplelsh();
+    ExampleLSH() : LSH<uint64_t, uint64_t>() {}
+    ~ExampleLSH() {}
 
-    // Add any additional methods or member variables here
+    uint64_t hashed(const uint64_t& input) override {
+        if(input % 2 != 0){
+            return input-1;
+        } else {
+            return input;
+        }
+    }
 };
+
 
 #endif // EXAMPLELSH_H
