@@ -6,7 +6,10 @@ Semester project
 
 The populate function of the filter has type: 
 ```c 
-bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, size_t length)```
+bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, size_t length)
+```
+
+How to use BFF
 
 ```cpp
   // Define the size of the filter
@@ -42,6 +45,9 @@ Note that here we don't need to specify the set size in advance since the size o
 The populate function of the filter has type: 
 ```c 
 bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::populate(const InputType* data, size_t length)
+```
+
+How to use fuzzyBFF:
 
 ```cpp
   // Define the size of the filter
