@@ -81,6 +81,7 @@ public:
     FingerprintType* filter;
 
 private:
+//TODO: need to initialize sth for some cases? 
     LSHType lsh;
 
     // Initialize the filter
