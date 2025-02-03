@@ -1,6 +1,8 @@
 # fuzzy_bff
 Semester project
 
+Bug in populate function - somewhere before line 225 (bff.h)
+construction fails more often than expected
 
 ## How to use BFF
 
