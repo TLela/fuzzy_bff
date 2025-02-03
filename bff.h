@@ -129,8 +129,8 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
 
     // Initialize arrays for stack P
     // Stack of hash/index pairs in order of detection
-    size_t *stackP_index = new size_t[filterLength];
-    uint8_t *stackP_hi = new uint8_t[filterLength];
+    size_t *stackP_index = new size_t[size];
+    uint8_t *stackP_hi = new uint8_t[size];
 
     // Initialize counters for stack P
     size_t stackP_pos = 0;
@@ -154,12 +154,6 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
                 arrayC_hash[index] ^= hash;
                 arrayC_count[index]++;
             }
-            // printf("arrayC_count: ");
-            // for(size_t i = 0; i < filterLength; i++){
-            //     printf("%llu ", arrayC_count[i]);
-            // }
-            // printf("  For hash value: %llu\n", hash);
-            // printf("\n");
         }
 
         // Scan through array C and add singletons to stack Q
@@ -176,7 +170,6 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
 
             // Pop location from stack Q
             size_t index = stackQ[stackQ_pos];
-
 
             // Check if we still have an element at this location
             if(arrayC_count[index]==1){
@@ -217,6 +210,16 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
         }
         else{
             printf("Construction failed, retrying...\n");
+            printf("stackP_pos: %lu\n", stackP_pos);
+            for(size_t i = 0; i < 180; i++){
+                if(arrayC_count[i] == 1){
+                    printf("Singleton at %lu\n", i);
+                }
+                else{
+                    printf("Count at %lu: %llu\n", i, arrayC_count[i]);
+                }
+            }
+
         }
 
         // If not, generate new hash functions
@@ -226,6 +229,7 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
         // Reset stack counters
         stackP_pos = 0;
         stackQ_pos = 0;
+
     }
     // Clean up
     delete[] arrayC_count;
