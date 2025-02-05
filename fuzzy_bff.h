@@ -68,6 +68,15 @@ public:
         return this->hashfunction;
     }
 
+    void printInfo() {
+        cout << "Filter details:" << endl;
+        cout << "Size:\t" << this->size << endl;
+        cout << "Segment Length:\t" << this->segmentLength << endl;
+        cout << "Segment Count:\t" << this->segmentCount << endl;
+        cout << "Array Length:\t" << this->arrayLength << endl;
+        cout << "Filter Length:\t" << this->filterLength << endl;
+    }
+
     // Public member variables
     // TODO: make private after testing?
     size_t size;
@@ -129,21 +138,29 @@ fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::~fuzzyBFF()
 
 template <typename InputType, typename ItemType, typename FingerprintType, typename HashFamily, typename LSHType>
 bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::populate(const InputType* data, size_t length) {
-
+    int failCtr = 0;
     // Map keys with LSH
     // Get rid of duplicates
     // TODO: consider efficiency of this step with unordered set
+
+
+    std::cout << "original length:\t" << length << std::endl;
+
     std::unordered_set<InputType> keys;
     for (size_t i = 0; i < length; i++) {
-        keys.insert(lsh.hashed(data[i]));
+        // commented the LSH part out for troubleshooting
+        // keys.insert(lsh.hashed(data[i]));
+        keys.insert(data[i]);
+        //std::cout << "lsh hased " << data[i] << ": " << lsh.hashed(data[i]) << std::endl;
     }
     std::vector<ItemType> data_new(keys.begin(), keys.end());
     
     this->size = data_new.size();
     length = data_new.size();
+    std::cout << "new length:\t" << length << std::endl;
 
     // Initialize filter
-    initFilter();
+    initFilter();  
 
     // Initialize arrays for array C
     // First mapping of values to their positions in the filter
@@ -236,9 +253,11 @@ bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::popula
         if (stackP_pos == size) {
             printf("Construction successful\n");
             break;
-        } else {
-            printf("Construction failed, retrying...\n");
-        }
+        } 
+        failCtr++;
+        printf("Construction failed for the %ith time, retrying...\n", failCtr);
+        this->printInfo();
+        
 
         // If not, generate new hash functions
         delete hashfunction;

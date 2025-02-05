@@ -44,6 +44,9 @@ How to use BFF
 ## How to use fuzzyBFF
 Note that here we don't need to specify the set size in advance since the size of the final set depends on the LSH we use.
 
+For debugging see `debug.cpp`. 
+Compile this file and execute it with `./debug <filtersize>`.
+
 The populate function of the filter has type: 
 ```c 
 bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::populate(const InputType* data, size_t length)
@@ -77,6 +80,8 @@ How to use fuzzyBFF:
   uint64_t newkey;
   bool isMember = myFilter.membership(newkey);
 ```
+
+
 
 ## Worklog
 - implemented populate function and membership function
