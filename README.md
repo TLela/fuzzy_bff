@@ -4,6 +4,7 @@ Semester project
 Bug in populate function - somewhere before line 225 (bff.h)
 construction fails more often than expected
 
+
 ## How to use BFF
 
 The populate function of the filter has type: 
@@ -41,6 +42,7 @@ How to use BFF
   bool isMember = myFilter.membership(key);
       
 ```
+
 ## How to use fuzzyBFF
 Note that here we don't need to specify the set size in advance since the size of the final set depends on the LSH we use.
 
@@ -80,8 +82,6 @@ How to use fuzzyBFF:
   uint64_t newkey;
   bool isMember = myFilter.membership(newkey);
 ```
-
-
 
 ## Worklog
 - implemented populate function and membership function
