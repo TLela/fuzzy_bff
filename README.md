@@ -1,8 +1,11 @@
 # fuzzy_bff
 Semester project
 
+Bug in populate function - somewhere before line 225 (bff.h)
+construction fails more often than expected
 
-# How to use BFF
+
+## How to use BFF
 
 The populate function of the filter has type: 
 ```c 
@@ -39,8 +42,12 @@ How to use BFF
   bool isMember = myFilter.membership(key);
       
 ```
-# How to use fuzzyBFF
+
+## How to use fuzzyBFF
 Note that here we don't need to specify the set size in advance since the size of the final set depends on the LSH we use.
+
+For debugging see `debug.cpp`. 
+Compile this file and execute it with `./debug <filtersize>`.
 
 The populate function of the filter has type: 
 ```c 
@@ -83,10 +90,10 @@ How to use fuzzyBFF:
 - revisit fuzzy bff and check if it works -> changed initialization, now after projecting to new set using lsh
 - create lsh classes
 - fixed mistake in memb function of fuzzy bff -> now checks memb of lsh(item) instead of item
+- readme and comment on bug
+- debug -> apparently they don't wrap arount - removed wrapping around for now, decide in next meeting how to proceed
 
 Next:
-- readme and comment on bug
-- debug
 - decide on example lsh and implement 2-3 (mo)
   - Hemming/Euclidean
   - read up on them 
