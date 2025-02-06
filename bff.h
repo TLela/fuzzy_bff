@@ -25,25 +25,25 @@ public:
         }
         // Filter needs to be bigger than size of input set
         double factor = fmax(1.125, 0.875 + 0.25 * log(1000000) / log(size));
-        printf("factor: %f\n", factor);
-        this->filterLength = factor * size;
-        printf("filterLength: %lu\n", this->filterLength);
+        this->arrayLength = factor * size;
 
         // We need to fit an integer number of segments in the filter
-        this->segmentCount = ((this->filterLength + this->segmentLength - 1) / this->segmentLength);
+        this->segmentCount = ((this->arrayLength + this->segmentLength - 1) / this->segmentLength);
 
         // TODO: decide what to do for small sizes. what if less than 3 segments are needed?
 
         // Size of the logical filter array
-        this->filterLength = this->segmentCount * this->segmentLength;
         // We wrap around the last two segments to ensure uniform randomness of hash positions of elements
         // This is done by adding two additional segments at the end of the filter - these correspond to the first two segments
-        this->segmentCount += 2;
-        this->arrayLength = this->segmentCount * this->segmentLength;
+        this->arrayLength = (this->segmentCount + 2) * this->segmentLength;
+        
+        // Parameters used for getHashFromHash function
+        this->segmentLengthMask = this->segmentLength - 1;
+        this->segmentCountLength = this->segmentCount * this->segmentLength;
 
         // Allocate memory for filter
-        this->filter = new FingerprintType[this->filterLength]();
-        std::fill_n(this->filter, this->filterLength, 0);
+        this->filter = new FingerprintType[this->arrayLength]();
+        std::fill_n(this->filter, this->arrayLength, 0);
 
         // Initialize hash function
         this->hashfunction = new HashFamily();
@@ -69,16 +69,15 @@ public:
     // See https://github.com/FastFilter/fastfilter_cpp
     inline __attribute__((always_inline)) size_t getHashFromHash(uint64_t hash,
                                                                int index) {
-        __uint128_t x = (__uint128_t)hash * (__uint128_t)(this->filterLength);
+        __uint128_t x = (__uint128_t)hash * (__uint128_t)(segmentCountLength);
         uint64_t h = (uint64_t)(x >> 64);
         h += index * this->segmentLength;
         // keep the lower 36 bits
         uint64_t hh = hash & ((1UL << 36) - 1);
         // index 0: right shift by 36; index 1: right shift by 18; index 2: no shift
-        h ^= (size_t)((hh >> (36 - 18 * index)) & (this->segmentLength - 1));
-        return h % (this->filterLength);
+        h ^= (size_t)((hh >> (36 - 18 * index)) & (segmentLengthMask));
+        return h;
     }
-
 
     bool membership(ItemType &item);
 
@@ -87,13 +86,22 @@ public:
         return this->hashfunction;
     }
 
+    void printInfo() {
+        cout << "Filter details:" << endl;
+        cout << "Size:\t" << this->size << endl;
+        cout << "Segment Length:\t" << this->segmentLength << endl;
+        cout << "Segment Count:\t" << this->segmentCount << endl;
+        cout << "Array Length:\t" << this->arrayLength << endl;
+    }
+
     // Public member variables
     // TODO: make private after testing?
     size_t size;
     size_t segmentLength;
     size_t arrayLength;
-    size_t filterLength;
     size_t segmentCount;
+    size_t segmentLengthMask;
+    size_t segmentCountLength;
     HashFamily *hashfunction;
 
     // Filter array
@@ -117,12 +125,12 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
 
     // Initialize arrays for array C
     // First mapping of values to their positions in the filter
-    uint64_t *arrayC_hash = new uint64_t[filterLength];
-    uint64_t *arrayC_count = new uint64_t[filterLength];
+    uint64_t *arrayC_hash = new uint64_t[arrayLength];
+    uint64_t *arrayC_count = new uint64_t[arrayLength];
 
     // Initialize arrays for stack Q
     // Stack of singletons
-    size_t *stackQ = new size_t[filterLength];
+    size_t *stackQ = new size_t[arrayLength];
 
     // Initialize counters for stack Q
     size_t stackQ_pos = 0;
@@ -140,8 +148,8 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
 
     
     while(true){
-        memset(arrayC_hash, 0, sizeof(uint64_t[filterLength]));
-        memset(arrayC_count, 0, sizeof(size_t[filterLength]));
+        memset(arrayC_hash, 0, sizeof(uint64_t[arrayLength]));
+        memset(arrayC_count, 0, sizeof(size_t[arrayLength]));
 
         // Scan through keys in set and add hashes of x 
         // to sets in array C corresponding to h_0(x), h_1(x), h_2(x). 
@@ -157,7 +165,7 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
         }
 
         // Scan through array C and add singletons to stack Q
-        for(size_t i = 0; i < filterLength; i++){
+        for(size_t i = 0; i < arrayLength; i++){
             if(arrayC_count[i] == 1){
                 stackQ[stackQ_pos++] = i;
             }
@@ -170,6 +178,7 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
 
             // Pop location from stack Q
             size_t index = stackQ[stackQ_pos];
+            // printf("index: %zu\n", index);
 
             // Check if we still have an element at this location
             if(arrayC_count[index]==1){
@@ -191,6 +200,7 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
                     // Check if we have a new singleton
                     else if(arrayC_count[index3] == 2){
                         stackQ[stackQ_pos++] = index3;
+                        // printf("New singleton found\n");
                     }
                     // Decrement counter
                     // update hash
@@ -211,15 +221,11 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
         else{
             printf("Construction failed, retrying...\n");
             printf("stackP_pos: %lu\n", stackP_pos);
-            for(size_t i = 0; i < 180; i++){
-                if(arrayC_count[i] == 1){
-                    printf("Singleton at %lu\n", i);
-                }
-                else{
-                    printf("Count at %lu: %llu\n", i, arrayC_count[i]);
-                }
-            }
-
+            printf("stackQ_pos: %lu\n", stackQ_pos);
+            // //print C_count
+            // for(size_t i = 0; i < arrayLength; i++){
+            //     printf("%llu ", arrayC_count[i]);
+            // }
         }
 
         // If not, generate new hash functions

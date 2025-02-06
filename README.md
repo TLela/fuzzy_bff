@@ -90,10 +90,10 @@ How to use fuzzyBFF:
 - revisit fuzzy bff and check if it works -> changed initialization, now after projecting to new set using lsh
 - create lsh classes
 - fixed mistake in memb function of fuzzy bff -> now checks memb of lsh(item) instead of item
+- readme and comment on bug
+- debug -> apparently they don't wrap arount - removed wrapping around for now, decide in next meeting how to proceed
 
 Next:
-- readme and comment on bug
-- debug
 - decide on example lsh and implement 2-3 (mo)
   - Hemming/Euclidean
   - read up on them 
