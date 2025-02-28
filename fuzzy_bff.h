@@ -94,7 +94,7 @@ private:
 
     // Initialize the filter
     inline __attribute__((always_inline)) void initFilter() {
-        // TODO: Have different values than their implementation (they add the 2 segments not always addiitonally but within the additional array size already considered I think...)
+        // TODO: Have different values than their implementation 
         // Calculate all necessary parameters to setup filter
         this->size = size;
         this->segmentLength = 1L << (int)floor(log(size) / log(3.33) + 2.25);
@@ -110,16 +110,17 @@ private:
         // We need to fit an integer number of segments in the filter
         this->segmentCount = ((this->arrayLength + this->segmentLength - 1) / this->segmentLength);
 
-        // TODO: decide what to do for small sizes. what if less than 3 segments are needed?
+        // For very small set sizes
+        if(this->segmentCount < 3){
+            this->segmentCount = 3;
+        }
 
         // Size of the logical filter array
-        // We wrap around the last two segments to ensure uniform randomness of hash positions of elements
-        // This is done by adding two additional segments at the end of the filter - these correspond to the first two segments
-        this->arrayLength = (this->segmentCount + 2) * this->segmentLength;
+        this->arrayLength = (this->segmentCount) * this->segmentLength;
         
         // Parameters used for getHashFromHash function
         this->segmentLengthMask = this->segmentLength - 1;
-        this->segmentCountLength = this->segmentCount * this->segmentLength;
+        this->segmentCountLength = (this->segmentCount-2) * this->segmentLength;
 
         // Allocate memory for filter
         this->filter = new FingerprintType[this->arrayLength]();

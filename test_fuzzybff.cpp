@@ -10,7 +10,7 @@ using namespace std;
 
 int main() {
     // Define the size of the filter
-    size_t size = 10000000;
+    size_t size = 100000;
 
     // Create an object of the fuzzyBFF class
     fuzzyBFF<uint64_t, uint64_t, uint32_t, hashing::TwoIndependentMultiplyShift, ExampleLSH> myFilter;
@@ -20,7 +20,7 @@ int main() {
     vector<uint64_t> data(size);
     std::random_device rd;
     std::mt19937_64 gen(rd());
-    std::uniform_int_distribution<uint64_t> dis(0,size);
+    std::uniform_int_distribution<uint64_t> dis(0,2*size);
 
     for (int i = 0; i < size; ++i) {
         data[i] = dis(gen);
@@ -28,7 +28,6 @@ int main() {
 
     // Call the populate function
     bool success = myFilter.populate(data, data.size());
-
 
     // Print some of the initialized values (optional)
     cout << "Filter details:" << endl;
@@ -39,7 +38,6 @@ int main() {
 
     // Get the pointer to the filter
     uint32_t* filter = myFilter.getFilter();
-
 
     int fncount = 0;
     int fpcount = 0;
@@ -68,8 +66,8 @@ int main() {
     }
 
     // fp and fn fraction
-    cout << "False negative fraction: " << fncount << "/" << size << endl;
-    cout << "False positive fraction: " << fpcount << "/" << notinsetsize << endl;
+    cout << "False negatives: " << fncount <<  endl;
+    cout << "False positives: " << fpcount << endl;
 
     return 0;
 }
