@@ -50,7 +50,7 @@ int main() {
         bool isMember = myFilter.membership(newkey);
         // False negative
         if (!isMember) {
-            cout << "False negative: " << data[i] << endl;
+            //cout << "False negative: " << data[i] << endl;
             fncount++;
         }
     }
@@ -60,7 +60,7 @@ int main() {
         bool isMember = myFilter.membership(i);
         // False positive
         if (isMember) {
-            cout << "False positive: " << i << endl;
+            //cout << "False positive: " << i << endl;
             fpcount++;
         }
     }

@@ -57,7 +57,7 @@ public:
         uint64_t hh = hash & ((1UL << 36) - 1);
         // index 0: right shift by 36; index 1: right shift by 18; index 2: no shift
         h ^= (size_t)((hh >> (36 - 18 * index)) & (this->segmentLength - 1));
-        return h % (this->arrayLength);
+        return h;
     }
 
     bool membership(InputType& item);
@@ -145,7 +145,10 @@ bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::popula
 
     std::unordered_set<InputType> keys;
     for (size_t i = 0; i < length; i++) {
-        keys.insert(lsh.hashed(data[i]));
+        std::vector<ItemType> lsh_keys = lsh.hash_values(data[i]);
+        for (size_t j = 0; j < lsh_keys.size(); j++) {
+            keys.insert(lsh_keys[j]);
+        }
     }
     std::vector<ItemType> data_new(keys.begin(), keys.end());
     
@@ -301,17 +304,29 @@ bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::popula
 template <typename InputType, typename ItemType, typename FingerprintType, typename HashFamily, typename LSHType>
 bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::membership(InputType& item) {
 
-    ItemType lsh_item = lsh.hashed(item);
-    uint64_t hash = (*hashfunction)(lsh_item);
-    FingerprintType xor2 = (FingerprintType)hash;
+    ItemType lsh_item;
+    uint64_t hash;
+    FingerprintType xor2 ;
 
-    // TODO: want to make it faster? inline the function call and combine for all three hi values
-    for (int hi = 0; hi < 3; hi++) {
-        size_t h = getHashFromHash(hash, hi);
-        xor2 ^= filter[h];
+    std::vector<ItemType> lsh_keys = lsh.hash_values(item);
+    for(int j = 0; j < lsh_keys.size(); j++){
+        lsh_item = lsh_keys[j];
+        printf("lsh_item: %llu\n", lsh_item);
+        hash = (*hashfunction)(lsh_item);
+        xor2 = (FingerprintType)hash;
+
+        // TODO: want to make it faster? inline the function call and combine for all three hi values
+        for (int hi = 0; hi < 3; hi++) {
+            size_t h = getHashFromHash(hash, hi);
+            xor2 ^= filter[h];
+            printf("xor2: %u\n", xor2);
+        }
+        if(xor2 == 0){
+            return true;
+        }
     }
+    return false;
     
-    return xor2 == 0;
 }
 
 #endif // FUZZY_BFF_H

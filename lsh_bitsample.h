@@ -1,13 +1,13 @@
-#ifndef EXAMPLELSH_H
-#define EXAMPLELSH_H
+#ifndef BITSAMPLELSH_H
+#define BITSAMPLELSH_H
 
 #include "lsh.h"
 #include <stdlib.h>
 
-class ExampleLSH : public LSH<uint64_t, uint64_t> {
+class BitSampleLSH : public LSH<uint64_t, uint64_t> {
 public:
-    ExampleLSH() : LSH<uint64_t, uint64_t>() {}
-    ~ExampleLSH() {}
+    BitSampleLSH() : LSH<uint64_t, uint64_t>() {}
+    ~BitSampleLSH() {}
 
     std::vector<uint64_t> hash_values(const uint64_t& input) override {
         std::vector<uint64_t> result;
@@ -18,8 +18,7 @@ public:
         }
         return result;
     }
-
 };
 
 
-#endif // EXAMPLELSH_H
+#endif // BITSAMPLELSH_H
