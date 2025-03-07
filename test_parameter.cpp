@@ -13,7 +13,8 @@ int main() {
         
         size_t segmentLength1 = 1L << (int)floor(log(size) / log(3.33) + 2.25);
 
-        // TODO: check why/if needed
+        // The current implementation hardcodes a 18-bit limit to
+        // to the segment length as stated in the original implementation.
         if (segmentLength1 > (1 << 18)) {
             segmentLength1 = (1 << 18);
         }

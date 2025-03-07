@@ -19,7 +19,8 @@ public:
         this->size = size;
         this->segmentLength = 1L << (int)floor(log(size) / log(3.33) + 2.25);
 
-        // TODO: check why/if needed
+        // The current implementation hardcodes a 18-bit limit to
+        // to the segment length as stated in the original implementation.
         if (this->segmentLength > (1 << 18)) {
             this->segmentLength = (1 << 18);
         }
@@ -96,7 +97,6 @@ public:
     }
 
     // Public member variables
-    // TODO: make private after testing?
     size_t size;
     size_t segmentLength;
     size_t arrayLength;

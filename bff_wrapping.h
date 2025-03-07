@@ -20,7 +20,8 @@ public:
         this->size = size;
         this->segmentLength = 1L << (int)floor(log(size) / log(3.33) + 2.25);
 
-        // TODO: check why/if needed
+        // The current implementation hardcodes a 18-bit limit to
+        // to the segment length as stated in the original implementation.
         if (this->segmentLength > (1 << 18)) {
             this->segmentLength = (1 << 18);
         }
@@ -31,7 +32,10 @@ public:
         // We need to fit an integer number of segments in the filter
         this->segmentCount = ((this->arrayLength + this->segmentLength - 1) / this->segmentLength);
 
-        // TODO: decide what to do for small sizes. what if less than 3 segments are needed?
+        // For very small set sizes
+        if(this->segmentCount < 1){
+            this->segmentCount = 1;
+        }
 
         // Size of the logical filter array
         // We wrap around the last two segments to ensure uniform randomness of hash positions of elements
@@ -96,7 +100,6 @@ public:
     }
 
     // Public member variables
-    // TODO: make private after testing?
     size_t size;
     size_t segmentLength;
     size_t arrayLength;
