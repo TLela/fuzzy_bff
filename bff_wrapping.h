@@ -1,5 +1,5 @@
-#ifndef BFF_wrapping_H
-#define BFF_wrapping_H
+#ifndef BFFwrapping_H
+#define BFFwrapping_H
 
 
 // Include necessary standard libraries
@@ -11,16 +11,17 @@
 using namespace std;
 
 template <typename ItemType, typename FingerprintType, typename HashFamily>
-class BFF_wrapping {
+class BFFwrapping {
 public:
     // Constructor
-    BFF_wrapping(const size_t size){
+    BFFwrapping(const size_t size){
         // TODO: Have different values than their implementation (they add the 2 segments not always addiitonally but within the additional array size already considered I think...)
         // Calculate all necessary parameters to setup filter
         this->size = size;
         this->segmentLength = 1L << (int)floor(log(size) / log(3.33) + 2.25);
 
-        // TODO: check why/if needed
+        // The current implementation hardcodes a 18-bit limit to
+        // to the segment length as stated in the original implementation.
         if (this->segmentLength > (1 << 18)) {
             this->segmentLength = (1 << 18);
         }
@@ -31,7 +32,10 @@ public:
         // We need to fit an integer number of segments in the filter
         this->segmentCount = ((this->arrayLength + this->segmentLength - 1) / this->segmentLength);
 
-        // TODO: decide what to do for small sizes. what if less than 3 segments are needed?
+        // For very small set sizes
+        if(this->segmentCount < 1){
+            this->segmentCount = 1;
+        }
 
         // Size of the logical filter array
         // We wrap around the last two segments to ensure uniform randomness of hash positions of elements
@@ -51,7 +55,7 @@ public:
     }
 
     // Destructor
-    ~BFF_wrapping();
+    ~BFFwrapping();
 
     // Public member functions
     // Populate with data in vector data
@@ -96,7 +100,6 @@ public:
     }
 
     // Public member variables
-    // TODO: make private after testing?
     size_t size;
     size_t segmentLength;
     size_t arrayLength;
@@ -111,13 +114,13 @@ public:
 };
 
 template <typename ItemType, typename FingerprintType, typename HashFamily>
-BFF_wrapping<ItemType, FingerprintType, HashFamily>::~BFF_wrapping() {
+BFFwrapping<ItemType, FingerprintType, HashFamily>::~BFFwrapping() {
     delete[] this->filter;
     delete this->hashfunction;
 }
 
 template <typename ItemType, typename FingerprintType, typename HashFamily>
-bool BFF_wrapping<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, size_t length){
+bool BFFwrapping<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, size_t length){
 
     // Check if the filter is big enough to hold the data
     if (length > this->size) {
@@ -167,29 +170,29 @@ bool BFF_wrapping<ItemType, FingerprintType, HashFamily>::populate(const ItemTyp
 
         ////////////////////////////////////////// Debugging
 
-        // // count singletons per segment
-        // size_t *singletonpersegment = new size_t[segmentCount];
-        // memset(singletonpersegment, 0, sizeof(size_t[segmentCount]));
-        // // count total mappings per segment
-        // size_t *countpersegment = new size_t[segmentCount];
-        // memset(countpersegment, 0, sizeof(size_t[segmentCount]));
+        // count singletons per segment
+        size_t *singletonpersegment = new size_t[segmentCount];
+        memset(singletonpersegment, 0, sizeof(size_t[segmentCount]));
 
-        // for(size_t i = 0; i < segmentCountLength; i++){
-        //     if(arrayC_count[i] > 0){
-        //         //find segment it belongs to
-        //         size_t segment = i / segmentLength;
-        //         countpersegment[segment]+=arrayC_count[i];
-        //     }
-        // }
+        // count total mappings per segment
+        size_t *countpersegment = new size_t[segmentCount];
+        memset(countpersegment, 0, sizeof(size_t[segmentCount]));
+        for(size_t i = 0; i < segmentCountLength; i++){
+            if(arrayC_count[i] > 0){
+                //find segment it belongs to
+                size_t segment = i / segmentLength;
+                countpersegment[segment]+=arrayC_count[i];
+            }
+        }
         //////////////////////////////////////////
         // Scan through array C and add singletons to stack Q
         for(size_t i = 0; i < segmentCountLength; i++){
             if(arrayC_count[i] == 1){
                 stackQ[stackQ_pos++] = i;
                 ////////////////////////////////////////// Debugging
-                // //find segment it belongs to
-                // size_t segment = i / segmentLength;
-                // singletonpersegment[segment]++;
+                //find segment it belongs to
+                size_t segment = i / segmentLength;
+                singletonpersegment[segment]++;
                 //////////////////////////////////////////
             }
         }
@@ -226,9 +229,9 @@ bool BFF_wrapping<ItemType, FingerprintType, HashFamily>::populate(const ItemTyp
                     else if(arrayC_count[index3] == 2){
                         stackQ[stackQ_pos++] = index3;
                         ////////////////////////////////////////// Debugging
-                        // //find segment it belongs to
-                        // size_t segment = index3 / segmentLength;
-                        // singletonpersegment[segment]++;
+                        //find segment it belongs to
+                        size_t segment = index3 / segmentLength;
+                        singletonpersegment[segment]++;
                         //////////////////////////////////////////
                     }
                     // Decrement counter
@@ -242,31 +245,30 @@ bool BFF_wrapping<ItemType, FingerprintType, HashFamily>::populate(const ItemTyp
             
         }
         ////////////////////////////////////////// Debugging
-        // // count remaining mappings per segment
-        // size_t *rempersegment = new size_t[segmentCount];
-        // memset(rempersegment, 0, sizeof(size_t[segmentCount]));
+        // count remaining mappings per segment
+        size_t *rempersegment = new size_t[segmentCount];
+        memset(rempersegment, 0, sizeof(size_t[segmentCount]));
 
-        // //print C_count
-        // for(size_t i = 0; i < segmentCountLength; i++){
-        //     if(arrayC_count[i] >0){
-        //         //find segment it belongs to
-        //         size_t segment = i / segmentLength;
-        //         rempersegment[segment]+=arrayC_count[i];
-        //     }
-        // }
+        //print C_count
+        for(size_t i = 0; i < segmentCountLength; i++){
+            if(arrayC_count[i] >0){
+                //find segment it belongs to
+                size_t segment = i / segmentLength;
+                rempersegment[segment]+=arrayC_count[i];
+            }
+        }
 
-        // //Note Singlt is the number of singletons used in construction not necessarily the number of singletons available per segment
-        // printf("Segm | Singlt | Total  | Ratio     |  Remaining (total) \n");
-        // printf("----------------------------------------------------------------------------\n");
+        printf("Segm | Singlt | Total  | Ratio     |  Remaining \n");
+        printf("----------------------------------------------------------------------------\n");
 
-        // for (size_t i = 0; i < segmentCount; i++) {
-        //     printf("%-4zu | %-6zu | %-6zu | %-9.6f | %-18zu\n", 
-        //         i, 
-        //         singletonpersegment[i], 
-        //         countpersegment[i], 
-        //         (double)singletonpersegment[i] / (countpersegment[i]-rempersegment[i]), 
-        //         rempersegment[i]);
-        // }
+        for (size_t i = 0; i < segmentCount; i++) {
+            printf("%-4zu | %-6zu | %-6zu | %-9.6f | %-18zu\n", 
+                i, 
+                singletonpersegment[i], 
+                countpersegment[i], 
+                (double)singletonpersegment[i] / (countpersegment[i]-rempersegment[i]), 
+                rempersegment[i]);
+        }
         //////////////////////////////////////////
         
 
@@ -278,7 +280,7 @@ bool BFF_wrapping<ItemType, FingerprintType, HashFamily>::populate(const ItemTyp
         else{
             printf("Construction failed, retrying...\n"); 
             ////////////////////////////////////////// Debugging
-            // exit(1);
+            exit(1);
             //////////////////////////////////////////          
         }
 
@@ -329,7 +331,7 @@ bool BFF_wrapping<ItemType, FingerprintType, HashFamily>::populate(const ItemTyp
 }
 
 template <typename ItemType, typename FingerprintType, typename HashFamily>
-bool BFF_wrapping <ItemType, FingerprintType, HashFamily>::membership(ItemType &item) {
+bool BFFwrapping <ItemType, FingerprintType, HashFamily>::membership(ItemType &item) {
 
     uint64_t hash = (*hashfunction)(item);
     FingerprintType xor2 = (FingerprintType)hash;
@@ -343,4 +345,4 @@ bool BFF_wrapping <ItemType, FingerprintType, HashFamily>::membership(ItemType &
     return xor2 == 0;
 }
 
-#endif // BFF_wrapping_H
+#endif // BFFwrapping_H

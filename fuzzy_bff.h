@@ -57,7 +57,7 @@ public:
         uint64_t hh = hash & ((1UL << 36) - 1);
         // index 0: right shift by 36; index 1: right shift by 18; index 2: no shift
         h ^= (size_t)((hh >> (36 - 18 * index)) & (this->segmentLength - 1));
-        return h % (this->arrayLength);
+        return h;
     }
 
     bool membership(InputType& item);
@@ -76,7 +76,6 @@ public:
     }
 
     // Public member variables
-    // TODO: make private after testing?
     size_t size;
     size_t segmentLength;
     size_t arrayLength;
@@ -84,14 +83,10 @@ public:
     size_t segmentLengthMask;
     size_t segmentCountLength;
     HashFamily* hashfunction;
-
-    // Filter array
     FingerprintType* filter;
-
-private:
-//TODO: need to initialize sth for some cases? 
     LSHType lsh;
 
+private:
     // Initialize the filter
     inline __attribute__((always_inline)) void initFilter() {
         // TODO: Have different values than their implementation 
@@ -99,7 +94,8 @@ private:
         this->size = size;
         this->segmentLength = 1L << (int)floor(log(size) / log(3.33) + 2.25);
 
-        // TODO: check why/if needed
+        // The current implementation hardcodes a 18-bit limit to
+        // to the segment length as stated in the original implementation.
         if (this->segmentLength > (1 << 18)) {
             this->segmentLength = (1 << 18);
         }
@@ -108,7 +104,8 @@ private:
         this->arrayLength = factor * size;
 
         // We need to fit an integer number of segments in the filter
-        this->segmentCount = ((this->arrayLength + this->segmentLength - 1) / this->segmentLength);
+        //TODO: Check if +2 is what we want
+        this->segmentCount = ((this->arrayLength + this->segmentLength - 1) / this->segmentLength) + 2;
 
         // For very small set sizes
         if(this->segmentCount < 3){
@@ -139,16 +136,18 @@ fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::~fuzzyBFF()
 
 template <typename InputType, typename ItemType, typename FingerprintType, typename HashFamily, typename LSHType>
 bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::populate(const InputType* data, size_t length) {
-    // Map keys with LSH
-    // Get rid of duplicates
-    // TODO: consider efficiency of this step with unordered set
 
+    // Map keys with LSH to their hash values and insert all unique values into the filter
     std::unordered_set<InputType> keys;
     for (size_t i = 0; i < length; i++) {
-        keys.insert(lsh.hashed(data[i]));
+        std::vector<ItemType> lsh_keys = lsh.hash_values(data[i]);
+        for (size_t j = 0; j < lsh_keys.size(); j++) {
+            keys.insert(lsh_keys[j]);
+        }
     }
     std::vector<ItemType> data_new(keys.begin(), keys.end());
-    
+  
+    // Update the new size of the dataset
     this->size = data_new.size();
     length = data_new.size();
 
@@ -250,8 +249,6 @@ bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::popula
             printf("Construction failed, retrying...\n");
         } 
         
-        
-
         // If not, generate new hash functions
         delete hashfunction;
         hashfunction = new HashFamily();
@@ -301,17 +298,32 @@ bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::popula
 template <typename InputType, typename ItemType, typename FingerprintType, typename HashFamily, typename LSHType>
 bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::membership(InputType& item) {
 
-    ItemType lsh_item = lsh.hashed(item);
-    uint64_t hash = (*hashfunction)(lsh_item);
-    FingerprintType xor2 = (FingerprintType)hash;
+    ItemType lsh_item;
+    uint64_t hash;
+    FingerprintType xor2 ;
 
-    // TODO: want to make it faster? inline the function call and combine for all three hi values
-    for (int hi = 0; hi < 3; hi++) {
-        size_t h = getHashFromHash(hash, hi);
-        xor2 ^= filter[h];
+    // Get hash values from LSH
+    std::vector<ItemType> lsh_keys = lsh.hash_values(item);
+
+    // Check if any of the hash values are in the filter
+    for(int j = 0; j < lsh_keys.size(); j++){
+        lsh_item = lsh_keys[j];
+        hash = (*hashfunction)(lsh_item);
+        xor2 = (FingerprintType)hash;
+
+        // TODO: want to make it faster? inline the function call and combine for all three hi values
+        for (int hi = 0; hi < 3; hi++) {
+            size_t h = getHashFromHash(hash, hi);
+            xor2 ^= filter[h];
+        }
+        // lsh_item is in filter, return true
+        if(xor2 == 0){
+            return true;
+        }
     }
+    // none of the lsh_keys are in filter, return false
+    return false;
     
-    return xor2 == 0;
 }
 
 #endif // FUZZY_BFF_H

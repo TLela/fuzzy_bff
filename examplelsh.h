@@ -9,13 +9,16 @@ public:
     ExampleLSH() : LSH<uint64_t, uint64_t>() {}
     ~ExampleLSH() {}
 
-    uint64_t hashed(const uint64_t& input) override {
+    std::vector<uint64_t> hash_values(const uint64_t& input) override {
+        std::vector<uint64_t> result;
         if(input % 2 != 0){
-            return input-1;
+            result.push_back(input-1);
         } else {
-            return input;
+            result.push_back(input);
         }
+        return result;
     }
+
 };
 
 

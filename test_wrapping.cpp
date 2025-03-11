@@ -1,11 +1,16 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include "bff.h" // Include the header file
+#include "bff.h" 
 #include "bff_wrapping.h"
 #include "timer.h"
 #include <random>
 
+// TEST: Compare the BFF and BFFwrapping classes.
+// We populate the filters with random data and check membership of the data.
+// Due to the wrapping the latter class will fail repeatedly. This phenomenon is described further in the writeup.
+// Comment-in the parts marked with "Debugging" in both classes' files. 
+// This will visualize the distribution of mapped values to the filter array for both classes.
 
 ::std::vector<::std::uint64_t> GenerateRandom64Fast(::std::size_t count,
                                                     uint64_t start) {
@@ -27,13 +32,13 @@ using namespace std;
 
 int main() {
     // Define the size of the filter
-    size_t size = 10000000;
+    size_t size = 1000000;
 
     // Create an object of the BFF class
     BFF<uint64_t, uint32_t, hashing::TwoIndependentMultiplyShift> myFilter(size);
 
-    // Create an object of the BFF_wrapping class
-    BFF_wrapping<uint64_t, uint32_t, hashing::TwoIndependentMultiplyShift> myFilter_wrapping(size);
+    // Create an object of the BFFwrapping class
+    BFFwrapping<uint64_t, uint32_t, hashing::TwoIndependentMultiplyShift> myFilter_wrapping(size);
 
     // Print some of the initialized values
     printf("BFF\n");
@@ -41,12 +46,18 @@ int main() {
     myFilter.printInfo();
     printf("----------------\n");
     printf("----------------\n");
-    printf("BFF_wrapping\n");
+    printf("BFFwrapping\n");
     printf("----------------\n");
     myFilter_wrapping.printInfo();
     printf("----------------\n");
     printf("----------------\n");
 
+    //Print description of table
+    cout << "Segm: Segment number" << endl;
+    cout << "Singlt: Number of singletons found" << endl;
+    cout << "Total: Total number of keys mapped to this semgent" << endl;
+    cout << "Ratio: Singletons found / (keys mapped to this segment - remaining keys)" << endl;
+    cout << "Remaining: Remaining keys mapped to this segment but no primary location found. This will be all zero if construction succeeded." << endl;
 
     // Prepare data to populate
     vector<uint64_t> data = GenerateRandom64Fast(size, rand()) ;
@@ -103,10 +114,10 @@ int main() {
     cout << "False positive fraction: " << fpcount << "/" << notinsetsize << endl;
 
     // Wrapping BFF
-    printf("Populating BFF_wrapping\n");
+    printf("Populating BFFwrapping\n");
     // Call the populate function
     success = myFilter_wrapping.populate(data, data.size());
-    time = popTime.Stop();
+    time = popTime.Stop(); // Most of the time we exit here bc the construction fails
     cout << "Populate time: " << time << " microseconds total" << endl;
     cout << "Populate time:" << time/size << " microseconds per item" << endl;
 

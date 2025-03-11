@@ -9,8 +9,10 @@ public:
     }
     virtual ~LSH() {
     }
-    virtual ItemType hashed(const InputType& input) {
-        return input;
+
+    virtual std::vector<ItemType> hash_values(const InputType& input) {
+        std::vector<ItemType> result;
+        return result;
     }
 };
 

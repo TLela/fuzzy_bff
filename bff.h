@@ -19,7 +19,8 @@ public:
         this->size = size;
         this->segmentLength = 1L << (int)floor(log(size) / log(3.33) + 2.25);
 
-        // TODO: check why/if needed
+        // The current implementation hardcodes a 18-bit limit to
+        // to the segment length as stated in the original implementation.
         if (this->segmentLength > (1 << 18)) {
             this->segmentLength = (1 << 18);
         }
@@ -28,7 +29,8 @@ public:
         this->arrayLength = factor * size;
 
         // We need to fit an integer number of segments in the filter
-        this->segmentCount = ((this->arrayLength + this->segmentLength - 1) / this->segmentLength);
+        //TODO: Check if +2 is what we want
+        this->segmentCount = ((this->arrayLength + this->segmentLength - 1) / this->segmentLength); // + 2;
 
         // For very small set sizes
         if(this->segmentCount < 3){
@@ -96,7 +98,6 @@ public:
     }
 
     // Public member variables
-    // TODO: make private after testing?
     size_t size;
     size_t segmentLength;
     size_t arrayLength;
@@ -166,7 +167,7 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
         }
         ////////////////////////////////////////// Debugging
 
-        // count singletons per segment
+        // //count singletons per segment
         // size_t *singletonpersegment = new size_t[segmentCount];
         // memset(singletonpersegment, 0, sizeof(size_t[segmentCount]));
         // // count total mappings per segment
@@ -229,7 +230,7 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
                         stackQ[stackQ_pos++] = index3;
                         // printf("New singleton found\n");
                         ////////////////////////////////////////// Debugging
-                        // //find segment it belongs to
+                        //find segment it belongs to
                         // size_t segment = index3 / segmentLength;
                         // singletonpersegment[segment]++;
                         //////////////////////////////////////////
@@ -246,7 +247,7 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
         }
 
         ////////////////////////////////////////// Debugging
-        // count remaining mappings per segment
+        // // count remaining mappings per segment
         // size_t *rempersegment = new size_t[segmentCount];
         // memset(rempersegment, 0, sizeof(size_t[segmentCount]));
 
@@ -258,7 +259,7 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
         //         rempersegment[segment]+=arrayC_count[i];
         //     }
         // }
-        // printf("Segm | Singlt | Total  | Ratio     |  Remaining (total) \n");
+        // printf("Segm | Singlt | Total  | Ratio     |  Remaining  \n");
         // printf("----------------------------------------------------------------------------\n");
 
         // for (size_t i = 0; i < segmentCount; i++) {

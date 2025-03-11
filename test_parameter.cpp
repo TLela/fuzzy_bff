@@ -9,11 +9,12 @@ void testFunction2();
 
 int main() {
     std::cout << "Running tests..." << std::endl;
-    for(int size = 0; size < 200; size++){
+    for(int size = 0; size < 10000; size+=1000){
         
         size_t segmentLength1 = 1L << (int)floor(log(size) / log(3.33) + 2.25);
 
-        // TODO: check why/if needed
+        // The current implementation hardcodes a 18-bit limit to
+        // to the segment length as stated in the original implementation.
         if (segmentLength1 > (1 << 18)) {
             segmentLength1 = (1 << 18);
         }
