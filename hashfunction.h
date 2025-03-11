@@ -1,7 +1,7 @@
 #ifndef HASHUTIL_H_
 #define HASHUTIL_H_
 
-// TODO: Used hash functions from gitrepo - do we want to use these or implement our own?
+// TODO: Used hash functions from original gitrepo - do we want to use these or implement our own?
 // See https://github.com/FastFilter/fastfilter_cpp
 
 #include <stdint.h>

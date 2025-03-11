@@ -104,7 +104,8 @@ private:
         this->arrayLength = factor * size;
 
         // We need to fit an integer number of segments in the filter
-        this->segmentCount = ((this->arrayLength + this->segmentLength - 1) / this->segmentLength);
+        //TODO: Check if +2 is what we want
+        this->segmentCount = ((this->arrayLength + this->segmentLength - 1) / this->segmentLength) + 2;
 
         // For very small set sizes
         if(this->segmentCount < 3){

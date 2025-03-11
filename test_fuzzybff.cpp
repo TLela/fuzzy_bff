@@ -36,7 +36,7 @@ int main() {
     std::unordered_set<int> flipped_bits; 
     double r_1 = lsh.r_1;
     for(int i = 0; i < testsize; i++){
-        while(flipped_bits.size() < r_1 * 64 - 1){
+        while(flipped_bits.size() < std::floor(r_1 * 64)){
             flipped_bits.insert(close(gen));
         }
         closedata[i] = data[i];
@@ -54,7 +54,7 @@ int main() {
     std::unordered_set<int> flipped_bits2;
     double r_2 = lsh.r_2;
     for(int i = 0; i < testsize; i++){
-        while(flipped_bits2.size() < r_2 * 64 + 1){
+        while(flipped_bits2.size() < std::ceil(r_2 * 64)){
             flipped_bits2.insert(far(gen));
         }
         fardata[i] = data[i];
