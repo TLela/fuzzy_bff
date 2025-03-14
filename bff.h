@@ -25,7 +25,7 @@ public:
             this->segmentLength = (1 << 18);
         }
         // Filter needs to be bigger than size of input set
-        double factor = fmax(1.125, 0.875 -  + 0.25 * log(1000000) / log(size));
+        double factor = fmax(1.125, 0.875 + 0.25 * log(1000000) / log(size));
         this->arrayLength = factor * size;
 
         // We need to fit an integer number of segments in the filter

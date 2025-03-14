@@ -19,7 +19,8 @@ int main() {
             segmentLength1 = (1 << 18);
         }
         // Filter needs to be bigger than size of input set
-        double factor1 = fmax(1.125, 0.875 -  + 0.25 * log(1000000) / log(size));
+        double factor1 = fmax(1.125, 0.875 + 0.25 * log(1000000) / log(size));
+
         size_t arrayLength1 = factor1 * size;
 
         // We need to fit an integer number of segments in the filter
@@ -68,6 +69,13 @@ int main() {
             std::cout << "arrayLength: " << arrayLength1 << " vs " << arrayLength2 << std::endl;
             std::cout << "segmentCount: " << segmentCount1-2 << " vs " << segmentCount2 << std::endl;
             std::cout << "segmentCountLength: " << segmentCountLength1 << " vs " << segmentCountLength2 << std::endl;
+        } else {
+            std::cout << "same results for both approaches" << std::endl;
+            std::cout << "size: " << size << std::endl;
+            std::cout << "segmentLength: " << segmentLength1 << std::endl;
+            std::cout << "arrayLength: " << arrayLength1 << std::endl;
+            std::cout << "segmentCount: " << segmentCount1-2 << std::endl;
+            std::cout << "segmentCountLength: " << segmentCountLength1 << std::endl;
         }
     }
     
