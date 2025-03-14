@@ -62,9 +62,8 @@ public:
 
     bool membership(InputType& item);
 
-    //get hashfunction for debugging
-    HashFamily* getHashFunction() {
-        return this->hashfunction;
+    void deleteFilter() {
+        delete[] this->filter;
     }
 
     void printInfo() {
@@ -89,7 +88,6 @@ public:
 private:
     // Initialize the filter
     inline __attribute__((always_inline)) void initFilter() {
-        // TODO: Have different values than their implementation 
         // Calculate all necessary parameters to setup filter
         this->size = size;
         this->segmentLength = 1L << (int)floor(log(size) / log(3.33) + 2.25);
@@ -105,7 +103,7 @@ private:
 
         // We need to fit an integer number of segments in the filter
         //TODO: Check if +2 is what we want
-        this->segmentCount = ((this->arrayLength + this->segmentLength - 1) / this->segmentLength) + 2;
+        this->segmentCount = ((this->arrayLength + this->segmentLength - 1) / this->segmentLength);
 
         // For very small set sizes
         if(this->segmentCount < 3){
@@ -311,7 +309,6 @@ bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::member
         hash = (*hashfunction)(lsh_item);
         xor2 = (FingerprintType)hash;
 
-        // TODO: want to make it faster? inline the function call and combine for all three hi values
         for (int hi = 0; hi < 3; hi++) {
             size_t h = getHashFromHash(hash, hi);
             xor2 ^= filter[h];

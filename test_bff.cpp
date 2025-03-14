@@ -27,7 +27,7 @@ using namespace std;
 
 int main() {
     // Define the size of the filter
-    size_t size = 10000;
+    size_t size = 1000;
     size_t testsize = 1000000;
     size_t actual_testsize = testsize; // will remove elements that are in both sets (data and notinset)
 

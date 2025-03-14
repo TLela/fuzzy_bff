@@ -11,11 +11,12 @@ using namespace std;
 
 int main() {
     // Define the size of the filter and the size of the test set
-    size_t size = 100000;
-    size_t testsize = 1000;
+    size_t size = 1000000;
+    size_t testsize = 10000;
 
     // Create an object of the fuzzyBFF class
     fuzzyBFF<uint64_t, uint64_t, uint32_t, hashing::TwoIndependentMultiplyShift, BitSampleLSH> myFilter;
+    BitSampleLSH lsh = myFilter.lsh;
 
     // Generate random keys to populate the filter
     vector<uint64_t> data(size);
@@ -27,7 +28,6 @@ int main() {
         data[i] = dis(gen);
     }
     
-    BitSampleLSH lsh;
 
     // Generate keys close to the above set to check false negatives
     // flip r_1 fraction of bits
@@ -45,6 +45,7 @@ int main() {
         }  
         flipped_bits.clear();   
     }
+    
     
 
     // Generate keys far from the above set to check false positives
@@ -87,8 +88,8 @@ int main() {
     }
    
     // fp and fn fraction
-    cout << "False negatives: " << fncount <<  endl;
-    cout << "False positives: " << fpcount << endl;
+    cout << "False negatives: " << fncount << "/" << testsize << endl;
+    cout << "False positives: " << fpcount << "/" << testsize << endl;
 
     return 0;
 }

@@ -9,7 +9,7 @@ void testFunction2();
 
 int main() {
     std::cout << "Running tests..." << std::endl;
-    for(int size = 0; size < 10000; size+=1000){
+    for(int size = 0; size < 10; size+=1){
         
         size_t segmentLength1 = 1L << (int)floor(log(size) / log(3.33) + 2.25);
 
@@ -21,10 +21,10 @@ int main() {
         // Filter needs to be bigger than size of input set
         double factor1 = fmax(1.125, 0.875 + 0.25 * log(1000000) / log(size));
 
-        size_t arrayLength1 = factor1 * size;
+        size_t capacity1 = factor1 * size;
 
         // We need to fit an integer number of segments in the filter
-        size_t segmentCount1 = ((arrayLength1 + segmentLength1 - 1) / segmentLength1);
+        size_t segmentCount1 = ((capacity1 + segmentLength1 - 1) / segmentLength1);
 
         // For very small set sizes
         if(segmentCount1 < 3){
@@ -32,7 +32,7 @@ int main() {
         }
         
         // Size of the logical filter array
-        arrayLength1 = segmentCount1 * segmentLength1;
+        size_t arrayLength1 = segmentCount1 * segmentLength1;
         
         // Parameters used for getHashFromHash function
         size_t segmentLengthMask1 = segmentLength1 - 1;
@@ -63,20 +63,23 @@ int main() {
 
         // Compare parameters:
 
-        if(segmentLength1 != segmentLength2 || arrayLength1 != arrayLength2 || segmentCount1-2 != segmentCount2 || segmentCountLength1 != segmentCountLength2) {
+        if(capacity1!=capacity2 || segmentLength1 != segmentLength2 || arrayLength1 != arrayLength2 || segmentCount1-2 != segmentCount2 || segmentCountLength1 != segmentCountLength2) {
             std::cout << "size: " << size << std::endl;
+            std::cout << "capacity: " << capacity1 << " vs " << capacity2 << std::endl;
             std::cout << "segmentLength: " << segmentLength1 << " vs " << segmentLength2 << std::endl;
             std::cout << "arrayLength: " << arrayLength1 << " vs " << arrayLength2 << std::endl;
             std::cout << "segmentCount: " << segmentCount1-2 << " vs " << segmentCount2 << std::endl;
             std::cout << "segmentCountLength: " << segmentCountLength1 << " vs " << segmentCountLength2 << std::endl;
-        } else {
-            std::cout << "same results for both approaches" << std::endl;
-            std::cout << "size: " << size << std::endl;
-            std::cout << "segmentLength: " << segmentLength1 << std::endl;
-            std::cout << "arrayLength: " << arrayLength1 << std::endl;
-            std::cout << "segmentCount: " << segmentCount1-2 << std::endl;
-            std::cout << "segmentCountLength: " << segmentCountLength1 << std::endl;
-        }
+        } 
+        // else {
+        //     std::cout << "same results for both approaches" << std::endl;
+        //     std::cout << "size: " << size << std::endl;
+        //     std::cout << "capacity: " << capacity1 << std::endl;
+        //     std::cout << "segmentLength: " << segmentLength1 << std::endl;
+        //     std::cout << "arrayLength: " << arrayLength1 << std::endl;
+        //     std::cout << "segmentCount: " << segmentCount1-2 << std::endl;
+        //     std::cout << "segmentCountLength: " << segmentCountLength1 << std::endl;
+        // }
     }
     
     return 0;
