@@ -11,7 +11,7 @@ using namespace std;
 
 int main() {
     // Define the size of the filter and the size of the test set
-    size_t size = 1000000;
+    size_t size = 100000;
     size_t testsize = 10000;
 
     // Create an object of the fuzzyBFF class
@@ -28,7 +28,6 @@ int main() {
         data[i] = dis(gen);
     }
     
-
     // Generate keys close to the above set to check false negatives
     // flip r_1 fraction of bits
     vector<uint64_t> closedata(testsize);
@@ -45,8 +44,6 @@ int main() {
         }  
         flipped_bits.clear();   
     }
-    
-    
 
     // Generate keys far from the above set to check false positives
     // flip r_2+1 fraction of bits
@@ -78,6 +75,14 @@ int main() {
     for (int i = 0; i < testsize; i++) {
         if (myFilter.membership(closedata[i]) == false) {
             fncount++;
+            // cout << "False negative: " << closedata[i] << endl; 
+            // // print fn in bit representation and data as well
+            // cout << "FN:  " << bitset<64>(closedata[i]) << endl;
+            // cout << "Data:" << bitset<64>(data[i]) << endl;
+            // // print bit representation of bitmasks
+            // for (int j = 0; j < lsh.or_op; j++) {
+            //     cout << "Bitm:" << bitset<64>(lsh.bitmasks[j]) << endl;
+            // }
         }
     }
     // Check for false positives

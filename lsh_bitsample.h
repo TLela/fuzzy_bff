@@ -10,14 +10,16 @@ public:
         //change variables according to use case
         r_1 = 0.05;
         r_2 = 0.4;
-        t = 0.2; //TODO: needed? redifine fp/fn?
         and_op = 35; //increase to decrease fp
         or_op = 45; //increase to decrease fn
+        //or_op = int(std::floor(and_op/pow(1-r_1,and_op))); //increase to decrease fn
 
         //resulting probabilities
         p_1 = 1 - pow(1 - pow(1 - r_1, and_op) , or_op);
         p_2 = 1 - pow(1 - pow(1 - r_2, and_op) , or_op);
 
+        std::cout << "and_op: " << and_op << std::endl;
+        std::cout << "or_op: " << or_op << std::endl;
         std::cout << "p_1: " << p_1 << std::endl;
         std::cout << "p_2: " << p_2 << std::endl;
 
@@ -26,18 +28,18 @@ public:
         std::mt19937_64 gen(rd());
         std::uniform_int_distribution<uint64_t> bits(0, 63);
 
-        std::unordered_set<int> flipped_bits; 
         uint64_t bitmask;
+        std::vector<int> bit_positions(64);
+        std::iota(bit_positions.begin(), bit_positions.end(), 0);
         for(int i = 0; i < or_op; i++){
-            while(flipped_bits.size() < and_op){
-                flipped_bits.insert(bits(gen));
-            }
+            // Shuffle and take the first 'and_op' bits
+            std::shuffle(bit_positions.begin(), bit_positions.end(), gen);
+            
             bitmask = 0;
-            for (int flipped_bit : flipped_bits) {
-                bitmask ^= (1ULL << flipped_bit);
-            }  
+            for (int j = 0; j < and_op; j++) {
+                bitmask ^= (1ULL << bit_positions[j]);
+            } 
             bitmasks.push_back(bitmask);
-            flipped_bits.clear();   
         }
     }
     ~BitSampleLSH() {}

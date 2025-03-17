@@ -26,6 +26,7 @@ public:
         this->segmentCount = 0;
         this->hashfunction = new HashFamily();
         this->filter = nullptr;
+        //this->lsh = LSHType();
     }
 
     // Destructor
@@ -83,7 +84,7 @@ public:
     size_t segmentCountLength;
     HashFamily* hashfunction;
     FingerprintType* filter;
-    LSHType lsh;
+    LSHType lsh= LSHType();
 
 private:
     // Initialize the filter
