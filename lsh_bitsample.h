@@ -28,16 +28,16 @@ public:
         std::mt19937_64 gen(rd());
         std::uniform_int_distribution<uint64_t> bits(0, 63);
 
-        uint64_t bitmask;
+        
         std::vector<int> bit_positions(64);
         std::iota(bit_positions.begin(), bit_positions.end(), 0);
         for(int i = 0; i < or_op; i++){
             // Shuffle and take the first 'and_op' bits
             std::shuffle(bit_positions.begin(), bit_positions.end(), gen);
             
-            bitmask = 0;
+            std::vector<int> bitmask(64,0);
             for (int j = 0; j < and_op; j++) {
-                bitmask ^= (1ULL << bit_positions[j]);
+                bitmask[bit_positions[j]] = 1;
             } 
             bitmasks.push_back(bitmask);
         }
@@ -47,7 +47,19 @@ public:
     std::vector<uint64_t> hash_values(const uint64_t& input) override {
         std::vector<uint64_t> result;
         for(int i = 0; i < or_op; i++){
-            result.push_back(input & bitmasks[i]);
+            uint64_t msb_value = static_cast<uint64_t>(i) << 56;
+            std::bitset<64> bit_input(input);
+            std::bitset<64> hash(0);
+            int andpos = 0;
+            for(int j = 0; j < 64; j++){
+                if(bitmasks[i][j]){
+                    hash.set(andpos, bit_input[j]);
+                    andpos++;
+                }
+            }
+            uint64_t hash_value = hash.to_ullong() | msb_value;
+            result.push_back(hash_value);
+            //std::cout << "bit repr hash_value: " << bitset<64>(hash_value) << std::endl;
         }
         return result;
     }
@@ -59,7 +71,7 @@ public:
     double p_1;
     double p_2;
     double t;
-    std::vector<uint64_t> bitmasks;
+    std::vector<std::vector<int>> bitmasks;
 };
 
 #endif // BITSAMPLELSH_H
