@@ -163,34 +163,11 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
                 arrayC_count[index]++;
             }
         }
-        ////////////////////////////////////////// Debugging
-
-        // //count singletons per segment
-        // size_t *singletonpersegment = new size_t[segmentCount];
-        // memset(singletonpersegment, 0, sizeof(size_t[segmentCount]));
-        // // count total mappings per segment
-        // size_t *countpersegment = new size_t[segmentCount];
-        // memset(countpersegment, 0, sizeof(size_t[segmentCount]));
-
-        // for(size_t i = 0; i < arrayLength; i++){
-        //     if(arrayC_count[i] > 0){
-        //         //find segment it belongs to
-        //         size_t segment = i / segmentLength;
-        //         countpersegment[segment]+=arrayC_count[i];
-        //     }
-        // }
-        //////////////////////////////////////////
 
         // Scan through array C and add singletons to stack Q
         for(size_t i = 0; i < arrayLength; i++){
             if(arrayC_count[i] == 1){
                 stackQ[stackQ_pos++] = i;
-
-                ////////////////////////////////////////// Debugging
-                // //find segment it belongs to
-                // size_t segment = i / segmentLength;
-                // singletonpersegment[segment]++;
-                //////////////////////////////////////////
             }
         }
 
@@ -225,15 +202,6 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
                     // Check if we have a new singleton
                     else if(arrayC_count[index3] == 2){
                         stackQ[stackQ_pos++] = index3;
-
-                        ////////////////////////////////////////// Debugging
-                        // // Uncomment this if you want to count the total number of singletons found over the
-                        // // course of the whole construction.
-                        // // Leave it, if you want only the singletons found in the initial traversal of the data.
-                       
-                        // size_t segment = index3 / segmentLength;
-                        // singletonpersegment[segment]++;
-                        //////////////////////////////////////////
                     }
                     // Decrement counter
                     // update hash
@@ -246,32 +214,6 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
             
         }
 
-        ////////////////////////////////////////// Debugging
-        // count remaining mappings per segment
-        // size_t *rempersegment = new size_t[segmentCount];
-        // memset(rempersegment, 0, sizeof(size_t[segmentCount]));
-
-        // //print C_count
-        // for(size_t i = 0; i < arrayLength; i++){
-        //     if(arrayC_count[i] >0){
-        //         //find segment it belongs to
-        //         size_t segment = i / segmentLength;
-        //         rempersegment[segment]+=arrayC_count[i];
-        //     }
-        // }
-        // printf("Segm | Singlt | Total  | Ratio     |  Remaining  \n");
-        // printf("----------------------------------------------------------------------------\n");
-
-        // for (size_t i = 0; i < segmentCount; i++) {
-        //     printf("%-4zu | %-6zu | %-6zu | %-9.6f | %-18zu\n", 
-        //         i, 
-        //         singletonpersegment[i], 
-        //         countpersegment[i], 
-        //         (double)singletonpersegment[i] / countpersegment[i], 
-        //         rempersegment[i]);
-        // }
-        //////////////////////////////////////////
-
         // Check if construction was successful
         if (stackP_pos == size){
             printf("Construction successful\n");
@@ -279,9 +221,6 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
         }
         else{
             printf("Construction failed, retrying...\n");
-            ////////////////////////////////////////// Debugging
-            // exit(1);
-            //////////////////////////////////////////
         }
 
         // If not, generate new hash functions

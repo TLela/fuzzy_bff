@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include "bff.h" 
 #include "bff_wrapping.h"
 #include "timer.h"
 #include <random>
@@ -9,8 +8,7 @@
 // TEST: Compare the BFF and BFFwrapping classes.
 // We populate the filters with random data and check membership of the data.
 // Due to the wrapping the latter class will fail repeatedly. This phenomenon is described further in the writeup.
-// Comment-in the parts marked with "Debugging" in both classes' files. 
-// This will visualize the distribution of mapped values to the filter array for both classes.
+// This test will visualize the distribution of mapped values to the filter array for both classes.
 
 ::std::vector<::std::uint64_t> GenerateRandom64Fast(::std::size_t count,
                                                     uint64_t start) {
@@ -32,10 +30,10 @@ using namespace std;
 
 int main() {
     // Define the size of the filter
-    size_t size = 1000000;
+    size_t size = 10000000;
 
     // Create an object of the BFF class
-    BFF<uint64_t, uint32_t, hashing::TwoIndependentMultiplyShift> myFilter(size);
+    BFFTEST<uint64_t, uint32_t, hashing::TwoIndependentMultiplyShift> myFilter(size);
 
     // Create an object of the BFFwrapping class
     BFFwrapping<uint64_t, uint32_t, hashing::TwoIndependentMultiplyShift> myFilter_wrapping(size);
