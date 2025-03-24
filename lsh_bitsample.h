@@ -11,7 +11,7 @@ public:
         r_1 = 3;
         r_2 = 15;
         and_op = 56; //increase to decrease fp; can be at most 56
-        or_op = 120; //increase to decrease fn; can be at most 256
+        or_op = 160; //increase to decrease fn; can be at most 256
         k = 64;
         //or_op = int(std::floor(and_op/pow(1-r_1/k,and_op))); 
 
