@@ -24,8 +24,9 @@ public:
         this->segmentLength = 0;
         this->arrayLength = 0;
         this->segmentCount = 0;
-        this->hashfunction = new HashFamily();
+        //this->hashfunction = new HashFamily();
         this->filter = nullptr;
+        //this->lsh = LSHType();
     }
 
     // Destructor
@@ -56,7 +57,7 @@ public:
         // keep the lower 36 bits
         uint64_t hh = hash & ((1UL << 36) - 1);
         // index 0: right shift by 36; index 1: right shift by 18; index 2: no shift
-        h ^= (size_t)((hh >> (36 - 18 * index)) & (this->segmentLength - 1));
+        h ^= (size_t)((hh >> (36 - 18 * index)) & (this->segmentLengthMask));
         return h;
     }
 
@@ -83,7 +84,7 @@ public:
     size_t segmentCountLength;
     HashFamily* hashfunction;
     FingerprintType* filter;
-    LSHType lsh;
+    LSHType lsh= LSHType();
 
 private:
     // Initialize the filter
@@ -166,8 +167,8 @@ bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::popula
 
     // Initialize arrays for stack P
     // Stack of hash/index pairs in order of detection
-    size_t* stackP_index = new size_t[arrayLength];
-    uint8_t* stackP_hi = new uint8_t[arrayLength];
+    size_t* stackP_index = new size_t[size];
+    uint8_t* stackP_hi = new uint8_t[size];
 
     // Initialize counters for stack P
     size_t stackP_pos = 0;
@@ -223,6 +224,7 @@ bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::popula
                     // In this case we store the hi value for later use
                     if (index3 == index) {
                         stackP_hi[stackP_pos] = hi;
+                        arrayC_count[index3] = 0;
                         continue; 
                     }
                     // Check if we have a new singleton
@@ -274,7 +276,6 @@ bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::popula
 
         // Calculate xor value
         xor2 = (FingerprintType)hash;
-
         size_t index3 = 0;
         for (int hi = 0; hi < 3; hi++) {
             if (hi != hi_found) {

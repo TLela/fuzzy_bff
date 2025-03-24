@@ -202,7 +202,6 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
 
             // Pop location from stack Q
             size_t index = stackQ[stackQ_pos];
-            // printf("index: %zu\n", index);
 
             // Check if we still have an element at this location
             if(arrayC_count[index]==1){
@@ -226,9 +225,12 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
                     // Check if we have a new singleton
                     else if(arrayC_count[index3] == 2){
                         stackQ[stackQ_pos++] = index3;
-                        // printf("New singleton found\n");
+
                         ////////////////////////////////////////// Debugging
-                        //find segment it belongs to
+                        // // Uncomment this if you want to count the total number of singletons found over the
+                        // // course of the whole construction.
+                        // // Leave it, if you want only the singletons found in the initial traversal of the data.
+                       
                         // size_t segment = index3 / segmentLength;
                         // singletonpersegment[segment]++;
                         //////////////////////////////////////////
@@ -245,7 +247,7 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
         }
 
         ////////////////////////////////////////// Debugging
-        // // count remaining mappings per segment
+        // count remaining mappings per segment
         // size_t *rempersegment = new size_t[segmentCount];
         // memset(rempersegment, 0, sizeof(size_t[segmentCount]));
 
