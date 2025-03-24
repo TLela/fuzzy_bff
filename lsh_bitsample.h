@@ -8,15 +8,16 @@ class BitSampleLSH : public LSH<uint64_t, uint64_t> {
 public:
     BitSampleLSH() : LSH<uint64_t, uint64_t>() {
         //change variables according to use case
-        r_1 = 0.05;
-        r_2 = 0.4;
-        and_op = 35; //increase to decrease fp
-        or_op = 45; //increase to decrease fn
-        //or_op = int(std::floor(and_op/pow(1-r_1,and_op))); //increase to decrease fn
+        r_1 = 3;
+        r_2 = 15;
+        and_op = 56; //increase to decrease fp; can be at most 56
+        or_op = 120; //increase to decrease fn; can be at most 256
+        k = 64;
+        //or_op = int(std::floor(and_op/pow(1-r_1/k,and_op))); 
 
         //resulting probabilities
-        p_1 = 1 - pow(1 - pow(1 - r_1, and_op) , or_op);
-        p_2 = 1 - pow(1 - pow(1 - r_2, and_op) , or_op);
+        p_1 = 1 - pow(1 - pow(1 - r_1/k, and_op) , or_op);
+        p_2 = 1 - pow(1 - pow(1 - r_2/k, and_op) , or_op);
 
         std::cout << "and_op: " << and_op << std::endl;
         std::cout << "or_op: " << or_op << std::endl;
@@ -25,19 +26,13 @@ public:
 
         //sample bitmasks
         std::random_device rd;
-        std::mt19937_64 gen(rd());
-        std::uniform_int_distribution<uint64_t> bits(0, 63);
+        std::mt19937_64 gen(rand());
+        std::uniform_int_distribution dis(0,63);
 
-        
-        std::vector<int> bit_positions(64);
-        std::iota(bit_positions.begin(), bit_positions.end(), 0);
         for(int i = 0; i < or_op; i++){
-            // Shuffle and take the first 'and_op' bits
-            std::shuffle(bit_positions.begin(), bit_positions.end(), gen);
-            
             std::vector<int> bitmask(64,0);
             for (int j = 0; j < and_op; j++) {
-                bitmask[bit_positions[j]] = 1;
+                bitmask[dis(gen)] = 1;
             } 
             bitmasks.push_back(bitmask);
         }
@@ -71,6 +66,7 @@ public:
     double p_1;
     double p_2;
     double t;
+    int k;
     std::vector<std::vector<int>> bitmasks;
 };
 
