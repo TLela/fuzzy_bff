@@ -7,22 +7,6 @@
 #include <unordered_set>
 
 
-::std::vector<::std::uint64_t> GenerateRandom64Fast(::std::size_t count,
-    uint64_t start) {
-::std::vector<::std::uint64_t> result(count);
-uint64_t index = start;
-auto genrand = [&index]() {
-// mix64
-uint64_t x = index++;
-x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9L;
-x = (x ^ (x >> 27)) * 0x94d049bb133111ebL;
-x = x ^ (x >> 31);
-return x;
-};
-::std::generate(result.begin(), result.end(), ::std::ref(genrand));
-return result;
-}
-
 using namespace std;
 
 int main() {
@@ -31,18 +15,13 @@ int main() {
     size_t testsize = 1000000;
     size_t actual_testsize = testsize; // will remove elements that are in both sets (data and notinset)
 
-    // Create an object of the fuzzyBFF class
-    BFF<uint64_t, uint32_t, hashing::TwoIndependentMultiplyShift> myFilter(size);
-
-    // Print some of the initialized values (optional)
-    myFilter.printInfo();
-
+    
     // Create set of random keys not in the set
     vector<uint64_t> notinset(testsize);
     std::random_device rd;
     std::mt19937_64 gen(rd());
     std::uniform_int_distribution<uint64_t> dis;
-
+    
     // Prepare data to populate
     std::unordered_set<uint64_t> keys;
     while(keys.size() != size){
@@ -50,15 +29,19 @@ int main() {
     }
     std::vector<uint64_t> data(keys.begin(), keys.end());
     // vector<uint64_t> data = GenerateRandom64Fast(size, rand()) ;
-
-
-    // Call the populate function
+    
+    // Create and populate the filter
     Timer popTime;
+    BFF<uint64_t, uint32_t, hashing::TwoIndependentMultiplyShift> myFilter(size);
     bool success = myFilter.populate(data, data.size());
     double time = popTime.Stop();
+    
     cout << "Populate time: " << time << " microseconds total" << endl;
     cout << "Populate time:" << time/size << " microseconds per item" << endl;
-
+    
+    // Print some of the initialized values (optional)
+    myFilter.printInfo();
+    
     // Get the pointer to the filter
     uint32_t* filter = myFilter.getFilter();
 
