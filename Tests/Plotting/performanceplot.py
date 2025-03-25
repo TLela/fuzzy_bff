@@ -15,7 +15,7 @@ querytime_fp = []
 querytime_fn_fuzzy = []
 querytime_fn = []
 
-with open('compare_BFF_fBFF.txt', 'r') as file:
+with open('../Results/compare_BFF_fBFF.txt', 'r') as file:
     reader = csv.reader(file)
     next(file)  # Skip the first line
     constr_temp = 0
@@ -27,7 +27,6 @@ with open('compare_BFF_fBFF.txt', 'r') as file:
             query_fp_temp += float(row[4])/1000
             query_fn_temp += float(row[5])/1000
         else:
-            print(row)
             if index < 3*n:
                 constr_temp += float(row[3])/1000
                 query_fp_temp += float(row[4])/1000

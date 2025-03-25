@@ -1,8 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include "bff_wrapping.h"
-#include "timer.h"
+#include "../bff_wrapping.h" // Include the header file
+#include "../timer.h"
 #include <random>
 
 // TEST: Compare the BFF and BFFwrapping classes.

@@ -1,8 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include "bff.h" // Include the header file
-#include "timer.h"
+#include "../bff.h" // Include the header file
+#include "../timer.h"
 #include <random>
 #include <unordered_set>
 

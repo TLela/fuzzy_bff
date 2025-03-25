@@ -1,9 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include "fuzzy_bff.h" // Include the header file
-#include "lsh_bitsample.h"
-#include "timer.h"
+#include "../fuzzy_bff.h" // Include the header file
+#include "../lsh_bitsample.h"
+#include "../timer.h"
 
 using namespace std;
 

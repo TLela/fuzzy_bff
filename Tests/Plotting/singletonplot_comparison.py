@@ -7,7 +7,7 @@ runs = 20
 # Read BFF data from file
 i = []
 bff_sing = []
-with open('BFFTEST0.txt', 'r') as file:
+with open("../Results/BFFTEST0.txt", 'r') as file:
     reader = csv.reader(file)
     next(file)  # Skip the first line
     for row in reader:
@@ -15,7 +15,7 @@ with open('BFFTEST0.txt', 'r') as file:
         bff_sing.append(float(row[1]))
 
 for countRuns in range(1,runs):
-    filename = 'BFFTEST' + str(countRuns) + '.txt'
+    filename = '../Results/BFFTEST' + str(countRuns) + '.txt'
     with open(filename, 'r') as file:
         reader = csv.reader(file)
         next(file)  # Skip the first line
@@ -28,14 +28,14 @@ for index, value in enumerate(bff_sing):
 
 # Read BFFwrapping data from file
 bffwrap_sing = []
-with open('BFFWRAPTEST0.txt', 'r') as file:
+with open('../Results/BFFWRAPTEST0.txt', 'r') as file:
     reader = csv.reader(file)
     next(file)  # Skip the first line
     for row in reader:
         bffwrap_sing.append(float(row[1]))
 
 for countRuns in range(1,runs):
-    filename = 'BFFWRAPTEST' + str(countRuns) + '.txt'
+    filename = '../Results/BFFWRAPTEST' + str(countRuns) + '.txt'
     with open(filename, 'r') as file:
         reader = csv.reader(file)
         next(file)  # Skip the first line

@@ -124,7 +124,7 @@ template <typename ItemType, typename FingerprintType, typename HashFamily>
 bool BFFwrapping<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, size_t length, int countRuns){
 
     // Create file to write resulting singleton distribution
-    string filename = "BFFWRAPTEST" + to_string(countRuns) + ".txt";
+    string filename = "Results/BFFWRAPTEST" + to_string(countRuns) + ".txt";
     ofstream BFFwrappingfile(filename);
 
     // Check if the filter is big enough to hold the data
@@ -475,7 +475,7 @@ template <typename ItemType, typename FingerprintType, typename HashFamily>
 bool BFFTEST<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, size_t length, int countRuns){
 
     // Create file to write resulting singleton distribution
-    string filename = "BFFTEST" + to_string(countRuns) + ".txt";
+    string filename = "Results/BFFTEST" + to_string(countRuns) + ".txt";
     ofstream BFFTESTfile(filename);
 
     // Check if the filter is big enough to hold the data

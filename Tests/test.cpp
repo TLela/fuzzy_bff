@@ -2,10 +2,10 @@
 #include <vector>
 #include <cmath>
 #include <fstream>
-#include "fuzzy_bff.h" // Include the header file
-#include "lsh_bitsample.h"
-#include "timer.h"
-#include "bff.h"
+#include "../fuzzy_bff.h" // Include the header file
+#include "../lsh_bitsample.h"
+#include "../timer.h"
+#include "../bff.h"
 
 using namespace std;
 
@@ -48,7 +48,7 @@ int main(){
     size.insert(size.end(), size.begin(), size.end());
     testsize.insert(testsize.end(), testsize.begin(), testsize.end());
     // write results to file
-    ofstream myfile("compare_BFF_fBFF.txt");
+    ofstream myfile("Results/compare_BFF_fBFF.txt");
     myfile << "Size,Testsize,Construction Time,Query Time FP,Query Time FN\n";
     for(int i = 0; i < size.size()/2; i++){
         myfile << size[i] << "," << testsize[i] << ","  << filtersize[3*i] << "," << constructiontime[3*i] << "," << querytime_fp[3*i] << "," << querytime_fn[3*i] << endl;
