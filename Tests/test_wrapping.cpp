@@ -16,8 +16,8 @@ void runtest(size_t size, int countRuns);
 
 int main(){
 
-    int runs = 20;
-    size_t size = 100000;
+    int runs = 10;
+    size_t size = 1000000;
     for(int i = 0; i < runs; i++){
         runtest(size, i);
     }

@@ -357,10 +357,6 @@ bool BFFwrapping <ItemType, FingerprintType, HashFamily>::membership(ItemType &i
 #ifndef BFFTEST_H
 #define BFFTEST_H
 
-// Include necessary standard libraries
-#include <stdlib.h>
-#include <vector>
-#include "hashfunction.h"
 
 
 using namespace std;
@@ -474,10 +470,6 @@ BFFTEST<ItemType, FingerprintType, HashFamily>::~BFFTEST() {
 template <typename ItemType, typename FingerprintType, typename HashFamily>
 bool BFFTEST<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, size_t length, int countRuns){
 
-    // Create file to write resulting singleton distribution
-    string filename = "Results/BFFTEST" + to_string(countRuns) + ".txt";
-    ofstream BFFTESTfile(filename);
-
     // Check if the filter is big enough to hold the data
     if (length > this->size) {
         return false;
@@ -554,7 +546,19 @@ bool BFFTEST<ItemType, FingerprintType, HashFamily>::populate(const ItemType* da
             }
         }
 
-        
+        // Create file to write resulting singleton distribution
+        string filename = "Results/BFFTEST_0_" + to_string(countRuns) + ".txt";
+        ofstream BFFTESTfile(filename);
+
+        BFFTESTfile << "Segm,Singlt,Total,Ratio,Remaining" << endl;
+        for (size_t i = 0; i < segmentCount; i++) {
+            BFFTESTfile<<
+                i << "," <<
+                singletonpersegment[i] << "," <<
+                countpersegment[i] << "," <<
+                (double)singletonpersegment[i] / countpersegment[i] <<  endl;
+        }
+        BFFTESTfile.close();
 
         // Go through stack Q and add singletons to stack P
         while(stackQ_pos > 0){
@@ -587,12 +591,12 @@ bool BFFTEST<ItemType, FingerprintType, HashFamily>::populate(const ItemType* da
                         stackQ[stackQ_pos++] = index3;
 
                         //////////////////////////////////////////  
-                        // // Uncomment this if you want to count the total number of singletons found over the
-                        // // course of the whole construction.
-                        // // Leave it out, if you want only the singletons found in the initial traversal of the data.
+                        // Uncomment this if you want to count the total number of singletons found over the
+                        // course of the whole construction.
+                        // Leave it out, if you want only the singletons found in the initial traversal of the data.
                        
-                        // size_t segment = index3 / segmentLength;
-                        // singletonpersegment[segment]++;
+                        size_t segment = index3 / segmentLength;
+                        singletonpersegment[segment]++;
                         //////////////////////////////////////////
                     }
                     // Decrement counter
@@ -602,33 +606,33 @@ bool BFFTEST<ItemType, FingerprintType, HashFamily>::populate(const ItemType* da
                 }
                 // Increase stack P position
                 stackP_pos++;
+
             }
+            
+            for(int p = 1; p < 5; p++){
+                if(stackP_pos == (size_t)(p * size/4)){
+                    //printf("Current size of stackP_pos: %zu\n", stackP_pos);
+                    // Create file to write resulting singleton distribution
+                    string filename = "Results/BFFTEST_" + to_string(p) + "_" + to_string(countRuns) + ".txt";
+                    ofstream BFFTESTfile(filename);
+
+                    BFFTESTfile << "Segm,Singlt,Total,Ratio,Remaining" << endl;
+                    for (size_t i = 0; i < segmentCount; i++) {
+                        BFFTESTfile<<
+                            i << "," <<
+                            singletonpersegment[i] << "," <<
+                            countpersegment[i] << "," <<
+                            (double)singletonpersegment[i] / countpersegment[i] <<  endl;
+                    }
+                    BFFTESTfile.close();
+                }
+            }            
             
         }
 
         //////////////////////////////////////////  
-        //count remaining mappings per segment
-        size_t *rempersegment = new size_t[segmentCount];
-        memset(rempersegment, 0, sizeof(size_t[segmentCount]));
-
-        //print C_count
-        for(size_t i = 0; i < arrayLength; i++){
-            if(arrayC_count[i] >0){
-                //find segment it belongs to
-                size_t segment = i / segmentLength;
-                rempersegment[segment]+=arrayC_count[i];
-            }
-        }
         
-        BFFTESTfile << "Segm,Singlt,Total,Ratio,Remaining" << endl;
-        for (size_t i = 0; i < segmentCount; i++) {
-            BFFTESTfile<<
-                i << "," <<
-                singletonpersegment[i] << "," <<
-                countpersegment[i] << "," <<
-                (double)singletonpersegment[i] / (countpersegment[i]-rempersegment[i]) << "," <<
-                rempersegment[i] << endl;
-        }
+
         //////////////////////////////////////////
 
         // Check if construction was successful

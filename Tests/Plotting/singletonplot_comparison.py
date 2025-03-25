@@ -2,12 +2,12 @@ import matplotlib.pyplot as plt
 import csv
 import numpy as np
 
-runs = 20
+runs = 10
 
 # Read BFF data from file
 i = []
 bff_sing = []
-with open("../Results/BFFTEST0.txt", 'r') as file:
+with open("../Results/BFFTEST_0_0.txt", 'r') as file:
     reader = csv.reader(file)
     next(file)  # Skip the first line
     for row in reader:
@@ -15,7 +15,7 @@ with open("../Results/BFFTEST0.txt", 'r') as file:
         bff_sing.append(float(row[1]))
 
 for countRuns in range(1,runs):
-    filename = '../Results/BFFTEST' + str(countRuns) + '.txt'
+    filename = '../Results/BFFTEST_0_' + str(countRuns) + '.txt'
     with open(filename, 'r') as file:
         reader = csv.reader(file)
         next(file)  # Skip the first line
