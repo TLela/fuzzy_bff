@@ -20,8 +20,8 @@ int main() {
     BitSampleLSH lsh = myFilter.lsh;
 
     // print expected total fp/fn 
-    //cout << "Expected false negatives: " << testsize * (1-(lsh.p_1 + pow(2,-64))) << endl;
-    //cout << "Expected false positives: " << testsize * (size * lsh.p_2 + pow(2,-64)) << endl;
+    cout << "Expected false negatives: " << testsize * (1-(lsh.p_1 + pow(2,-64))) << endl;
+    cout << "Expected false positives: " << testsize * (size * lsh.p_2 + pow(2,-64)) << endl;
 
     // Generate random keys to populate the filter
     vector<uint64_t> data(size);

@@ -9,9 +9,9 @@
 
 using namespace std;
 
-void fuzzyBFFTest(size_t size, size_t testsize, vector<size_t>& filtersize, vector<double>& constructiontime, vector<double>& querytime_fp, vector<double>& querytime_fn, vector<uint64_t>& data, vector<uint64_t>& closedata, vector<uint64_t>& fardata);
+void fuzzyBFFTest(size_t size, size_t testsize, vector<size_t>& filtersize, vector<double>& constructiontime, vector<double>& querytime_fp, vector<double>& querytime_fn, vector<uint64_t>& data, vector<uint64_t>& closedata, vector<uint64_t>& fardata, vector<int>& fpcount, vector<int>& fncount, vector<double>& expected_fp, vector<double>& expected_fn);
 void DataGeneration(size_t maxsize, size_t maxtestsize, int r_1, int r_2, vector<uint64_t>& data, vector<uint64_t>& closedata, vector<uint64_t>& fardata);
-void BFFTest(size_t size, size_t testsize, vector<size_t>& filtersize, vector<double>& constructiontime, vector<double>& querytime_fp, vector<double>& querytime_fn, vector<uint64_t>& data, vector<uint64_t>& fardata);
+void BFFTest(size_t size, size_t testsize, vector<size_t>& filtersize, vector<double>& constructiontime, vector<double>& querytime_fp, vector<double>& querytime_fn, vector<uint64_t>& data, vector<uint64_t>& fardata, vector<int>& fpcount, vector<int>& fncount);
 
 int main(){
 
@@ -20,10 +20,14 @@ int main(){
     vector<double> constructiontime;
     vector<double> querytime_fp;
     vector<double> querytime_fn;
+    vector<int> fpcount;
+    vector<int> fncount;
+    vector<double> expected_fp;
+    vector<double> expected_fn;
 
     // Define the size of the filter and the size of the test set
-    vector<size_t> size = {10000, 20000, 40000, 80000, 160000};
-    vector<size_t> testsize = {10000, 10000, 10000, 10000, 10000};
+    vector<size_t> size = {10000};//, 20000, 40000, 80000, 160000, 320000, 640000};
+    vector<size_t> testsize = {10000};//, 10000, 10000, 10000, 10000, 10000, 10000};
 
     // Generate data
     vector<uint64_t> data(size.back());
@@ -34,14 +38,14 @@ int main(){
     DataGeneration(size.back(),testsize.back(), r_1, r_2, data, closedata, fardata);
 
     for(int i = 0; i < size.size(); i++){
-        fuzzyBFFTest(size[i], testsize[i], filtersize, constructiontime, querytime_fp, querytime_fn, data, closedata, fardata);
-        fuzzyBFFTest(size[i], testsize[i], filtersize, constructiontime, querytime_fp, querytime_fn, data, closedata, fardata);
-        fuzzyBFFTest(size[i], testsize[i], filtersize, constructiontime, querytime_fp, querytime_fn, data, closedata, fardata);
+        fuzzyBFFTest(size[i], testsize[i], filtersize, constructiontime, querytime_fp, querytime_fn, data, closedata, fardata, fpcount, fncount, expected_fp, expected_fn);
+        fuzzyBFFTest(size[i], testsize[i], filtersize, constructiontime, querytime_fp, querytime_fn, data, closedata, fardata, fpcount, fncount, expected_fp, expected_fn);
+        fuzzyBFFTest(size[i], testsize[i], filtersize, constructiontime, querytime_fp, querytime_fn, data, closedata, fardata, fpcount, fncount, expected_fp, expected_fn);
     }
     for(int i = 0; i < size.size(); i++){
-        BFFTest(size[i], testsize[i], filtersize, constructiontime, querytime_fp, querytime_fn, data, fardata);
-        BFFTest(size[i], testsize[i], filtersize, constructiontime, querytime_fp, querytime_fn, data, fardata);
-        BFFTest(size[i], testsize[i], filtersize, constructiontime, querytime_fp, querytime_fn, data, fardata);
+        BFFTest(size[i], testsize[i], filtersize, constructiontime, querytime_fp, querytime_fn, data, fardata, fpcount, fncount);
+        BFFTest(size[i], testsize[i], filtersize, constructiontime, querytime_fp, querytime_fn, data, fardata, fpcount, fncount);
+        BFFTest(size[i], testsize[i], filtersize, constructiontime, querytime_fp, querytime_fn, data, fardata, fpcount, fncount);
     }
 
     // duplicat size and testsize for easier printing
@@ -51,14 +55,14 @@ int main(){
     ofstream myfile("Results/compare_BFF_fBFF.txt");
     myfile << "Size,Testsize,Construction Time,Query Time FP,Query Time FN\n";
     for(int i = 0; i < size.size()/2; i++){
-        myfile << size[i] << "," << testsize[i] << ","  << filtersize[3*i] << "," << constructiontime[3*i] << "," << querytime_fp[3*i] << "," << querytime_fn[3*i] << endl;
-        myfile << size[i] << "," << testsize[i] << ","  << filtersize[3*i+1] << "," << constructiontime[3*i+1] << "," << querytime_fp[3*i+1] << "," << querytime_fn[3*i+1] << endl;
-        myfile << size[i] << "," << testsize[i] << ","  << filtersize[3*i+2] << "," << constructiontime[3*i+2] << "," << querytime_fp[3*i+2] << "," << querytime_fn[3*i+2] << endl;
+        myfile << size[i] << "," << testsize[i] << ","  << filtersize[3*i] << "," << constructiontime[3*i] << "," << querytime_fp[3*i] << "," << querytime_fn[3*i] << ","  << fpcount[3*i] << ","  << fncount[3*i] << "," << expected_fp[3*i] << "," << expected_fn[3*i] << endl;
+        myfile << size[i] << "," << testsize[i] << ","  << filtersize[3*i+1] << "," << constructiontime[3*i+1] << "," << querytime_fp[3*i+1] << "," << querytime_fn[3*i+1] << ","  << fpcount[3*i+1] << ","  << fncount[3*i+1] << "," << expected_fp[3*i+2] << "," << expected_fn[3*i+2] << endl;
+        myfile << size[i] << "," << testsize[i] << ","  << filtersize[3*i+2] << "," << constructiontime[3*i+2] << "," << querytime_fp[3*i+2] << "," << querytime_fn[3*i+2] << ","  << fpcount[3*i+2] << ","  << fncount[3*i+2] << "," << expected_fp[3*i+2] << "," << expected_fn[3*i+2] << endl;
     }
     for(int i = size.size()/2; i < size.size(); i++){
-        myfile << size[i] << "," << testsize[i]<< ","  << filtersize[3*i] << "," << constructiontime[3*i] << "," << querytime_fp[3*i] << "," << querytime_fn[3*i] << endl;
-        myfile << size[i] << "," << testsize[i] << ","  << filtersize[3*i+1] << "," << constructiontime[3*i+1] << "," << querytime_fp[3*i+1] << "," << querytime_fn[3*i+1] << endl;
-        myfile << size[i] << "," << testsize[i] << ","  << filtersize[3*i+2] << "," << constructiontime[3*i+2] << "," << querytime_fp[3*i+2] << "," << querytime_fn[3*i+2] << endl;
+        myfile << size[i] << "," << testsize[i] << ","  << filtersize[3*i] << "," << constructiontime[3*i] << "," << querytime_fp[3*i] << "," << querytime_fn[3*i] << ","  << fpcount[3*i] << ","  << fncount[3*i] << endl;
+        myfile << size[i] << "," << testsize[i] << ","  << filtersize[3*i+1] << "," << constructiontime[3*i+1] << "," << querytime_fp[3*i+1] << "," << querytime_fn[3*i+1] << ","  << fpcount[3*i+1] << ","  << fncount[3*i+1] << endl;
+        myfile << size[i] << "," << testsize[i] << ","  << filtersize[3*i+2] << "," << constructiontime[3*i+2] << "," << querytime_fp[3*i+2] << "," << querytime_fn[3*i+2] << ","  << fpcount[3*i+2] << ","  << fncount[3*i+2] << endl;
 
     }
 
@@ -118,12 +122,11 @@ void DataGeneration(size_t maxsize, size_t maxtestsize, int r_1, int r_2, vector
             }
         }
     }
-    cout << "size of unorderedfar_keys: " << unorderedfar_keys.size() << endl;
     cout << "Data generation completed." << endl;
 
 }
 
-void fuzzyBFFTest(size_t size, size_t testsize, vector<size_t>& filtersize, vector<double>& constructiontime, vector<double>& querytime_fp, vector<double>& querytime_fn, vector<uint64_t>& data, vector<uint64_t>& closedata, vector<uint64_t>& fardata){ 
+void fuzzyBFFTest(size_t size, size_t testsize, vector<size_t>& filtersize, vector<double>& constructiontime, vector<double>& querytime_fp, vector<double>& querytime_fn, vector<uint64_t>& data, vector<uint64_t>& closedata, vector<uint64_t>& fardata, vector<int>& fpcount, vector<int>& fncount, vector<double>& expected_fp, vector<double>& expected_fn){ 
     
     // Construct and populate the filter
     Timer construction;
@@ -133,11 +136,15 @@ void fuzzyBFFTest(size_t size, size_t testsize, vector<size_t>& filtersize, vect
     constructiontime.push_back(time);
     filtersize.push_back(myFilter.arrayLength);
 
-    // Print some of the initialized values
-    myFilter.printInfo();
 
-    int fncount = 0;
-    int fpcount = 0;
+    // Get expected false positive and false negative rates
+    // print expected total fp/fn 
+    BitSampleLSH lsh;
+    expected_fp.push_back(testsize * (size * lsh.p_2 + pow(2,-64)));
+    expected_fn.push_back(testsize * (1-(lsh.p_1 + pow(2,-64))));
+
+    int fncount_tmp = 0;
+    int fpcount_tmp = 0;
     double membership = 0;
 
     // Check for false negatives
@@ -147,10 +154,11 @@ void fuzzyBFFTest(size_t size, size_t testsize, vector<size_t>& filtersize, vect
         membership = myFilter.membership(closedata[i]);
         time_fn += query_fn.Stop();
         if (membership == false) {
-            fncount++;            
+            fncount_tmp++;            
         }
     }
     querytime_fn.push_back(time_fn/testsize);
+    fncount.push_back(fncount_tmp);
 
     // Check for false positives
     double time_fp = 0;
@@ -159,18 +167,14 @@ void fuzzyBFFTest(size_t size, size_t testsize, vector<size_t>& filtersize, vect
         membership = myFilter.membership(fardata[i]);
         time_fp += query_fp.Stop();
         if (membership == true) {
-            fpcount++;
+            fpcount_tmp++;
         }
     }
     querytime_fp.push_back(time_fp/testsize);
-   
-    // fp and fn fraction
-    cout << "False negatives: " << fncount << "/" << testsize << endl;
-    cout << "False positives: " << fpcount << "/" << testsize << endl;
-
+    fpcount.push_back(fpcount_tmp);
 }
 
-void BFFTest(size_t size, size_t testsize, vector<size_t>& filtersize, vector<double>& constructiontime, vector<double>& querytime_fp, vector<double>& querytime_fn, vector<uint64_t>& data, vector<uint64_t>& fardata){ 
+void BFFTest(size_t size, size_t testsize, vector<size_t>& filtersize, vector<double>& constructiontime, vector<double>& querytime_fp, vector<double>& querytime_fn, vector<uint64_t>& data, vector<uint64_t>& fardata, vector<int>& fpcount, vector<int>& fncount){ 
      
      // Create and populate the filter
      Timer popTime;
@@ -179,18 +183,9 @@ void BFFTest(size_t size, size_t testsize, vector<size_t>& filtersize, vector<do
      double time = popTime.Stop();
      constructiontime.push_back(time);
      filtersize.push_back(myFilter.arrayLength);
-     
-     cout << "Populate time: " << time << " microseconds total" << endl;
-     cout << "Populate time:" << time/size << " microseconds per item" << endl;
-     
-     // Print some of the initialized values (optional)
-     myFilter.printInfo();
-     
-     // Get the pointer to the filter
-     uint32_t* filter = myFilter.getFilter();
  
-     int fncount = 0;
-     int fpcount = 0;
+     int fncount_tmp = 0;
+     int fpcount_tmp = 0;
      double membership = 0;
 
     // Check for false negatives
@@ -200,10 +195,11 @@ void BFFTest(size_t size, size_t testsize, vector<size_t>& filtersize, vector<do
         membership = myFilter.membership(data[i]);
         time_fn += query_fn.Stop();
         if (membership == false) {
-            fncount++;            
+            fncount_tmp++;            
         }
     }
     querytime_fn.push_back(time_fn/testsize);
+    fncount.push_back(fncount_tmp);
 
     // Check for false positives
     double time_fp = 0;
@@ -212,12 +208,9 @@ void BFFTest(size_t size, size_t testsize, vector<size_t>& filtersize, vector<do
         membership = myFilter.membership(fardata[i]);
         time_fp += query_fp.Stop();
         if (membership == true) {
-            fpcount++;
+            fpcount_tmp++;
         }
     }
     querytime_fp.push_back(time_fp/testsize);
- 
-     // fp and fn fraction
-     cout << "False negative fraction: " << fncount << "/" << testsize << endl;
-     cout << "False positive fraction: " << fpcount << "/" << testsize << endl;   
+    fpcount.push_back(fpcount_tmp);
 }

@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import csv
 import numpy as np
 
-n = 5
+n = 1
 
 # Read data from file
 size = []
@@ -82,7 +82,7 @@ plt.yticks(fontsize=11)
 
 # Add a light grid for better readability
 plt.grid(True, which="both", linestyle="--", linewidth=0.5, alpha=0.7)
-
+plt.savefig("../Plots/Constructiontime.png")
 plt.show()
 
 # Create the figure and axis
@@ -110,6 +110,7 @@ plt.yticks(fontsize=11)
 # Add a light grid for better readability
 plt.grid(True, which="both", linestyle="--", linewidth=0.5, alpha=0.7)
 
+plt.savefig("../Plots/Filtersize.png")
 plt.show()
 
 # Create the figure and axis
@@ -139,6 +140,7 @@ plt.yticks(fontsize=11)
 # Add a light grid for better readability
 plt.grid(True, which="both", linestyle="--", linewidth=0.5, alpha=0.7)
 
+plt.savefig("../Plots/Querytime.png")
 plt.show()
 
 # Create the figure and axis
@@ -166,6 +168,7 @@ plt.yticks(fontsize=11)
 # Add a light grid for better readability
 plt.grid(True, which="both", linestyle="--", linewidth=0.5, alpha=0.7)
 
+plt.savefig("../Plots/Querytime_BFF.png")
 plt.show()
 
 # Create the figure and axis
@@ -193,4 +196,5 @@ plt.yticks(fontsize=11)
 # Add a light grid for better readability
 plt.grid(True, which="both", linestyle="--", linewidth=0.5, alpha=0.7)
 
+plt.savefig("../Plots/Querytime_fuzzy_BFF.png")
 plt.show()
