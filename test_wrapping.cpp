@@ -12,10 +12,20 @@
 
 
 using namespace std;
+void runtest(size_t size, int countRuns);
 
-int main() {
-    // Define the size of the filter
-    size_t size = 1000000;
+int main(){
+
+    int runs = 20;
+    size_t size = 100000;
+    for(int i = 0; i < runs; i++){
+        runtest(size, i);
+    }
+
+    return 0;
+}
+
+void runtest(size_t size, int countRuns){
 
     // Create an object of the BFF class
     BFFTEST<uint64_t, uint32_t, hashing::TwoIndependentMultiplyShift> myFilter(size);
@@ -57,7 +67,7 @@ int main() {
     printf("Populating BFF\n");
     // Call the populate function
     Timer popTime;
-    bool success = myFilter.populate(data, data.size());
+    bool success = myFilter.populate(data, data.size(), countRuns);
     double time = popTime.Stop();
     cout << "Populate time: " << time << " microseconds total" << endl;
     cout << "Populate time:" << time/size << " microseconds per item" << endl;
@@ -65,10 +75,9 @@ int main() {
     // Wrapping BFF
     printf("Populating BFFwrapping\n");
     // Call the populate function
-    success = myFilter_wrapping.populate(data, data.size());
+    success = myFilter_wrapping.populate(data, data.size(), countRuns);
     time = popTime.Stop(); // Most of the time we exit here bc the construction fails
     cout << "Populate time: " << time << " microseconds total" << endl;
     cout << "Populate time:" << time/size << " microseconds per item" << endl;
 
-    return 0;
 }

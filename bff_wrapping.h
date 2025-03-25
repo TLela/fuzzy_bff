@@ -60,12 +60,12 @@ public:
 
     // Public member functions
     // Populate with data in vector data
-    bool populate(const vector<ItemType>& data, size_t length){
-        return  populate(data.data(), length);
+    bool populate(const vector<ItemType>& data, size_t length, int countRuns){
+        return  populate(data.data(), length, countRuns);
     }
 
     // Populate with data in array data
-    bool populate(const ItemType* data, size_t length);
+    bool populate(const ItemType* data, size_t length, int countRuns);
 
     // Get pointer to filter
     FingerprintType* getFilter(){
@@ -121,10 +121,11 @@ BFFwrapping<ItemType, FingerprintType, HashFamily>::~BFFwrapping() {
 }
 
 template <typename ItemType, typename FingerprintType, typename HashFamily>
-bool BFFwrapping<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, size_t length){
+bool BFFwrapping<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, size_t length, int countRuns){
 
     // Create file to write resulting singleton distribution
-    ofstream BFFwrappingfile("BFFWRAPTEST.txt");
+    string filename = "BFFWRAPTEST" + to_string(countRuns) + ".txt";
+    ofstream BFFwrappingfile(filename);
 
     // Check if the filter is big enough to hold the data
     if (length > this->size) {
@@ -285,7 +286,7 @@ bool BFFwrapping<ItemType, FingerprintType, HashFamily>::populate(const ItemType
         else{
             printf("Construction failed, retrying...\n"); 
             //////////////////////////////////////////  
-            exit(1);
+            return false;
             //////////////////////////////////////////          
         }
 
@@ -410,12 +411,12 @@ public:
 
     // Public member functions
     // Populate with data in vector data
-    bool populate(const vector<ItemType>& data, size_t length){
-        return  populate(data.data(), length);
+    bool populate(const vector<ItemType>& data, size_t length, int countRuns){
+        return  populate(data.data(), length, countRuns);
     }
 
     // Populate with data in array data
-    bool populate(const ItemType* data, size_t length);
+    bool populate(const ItemType* data, size_t length, int countRuns);
 
     // Get pointer to filter
     FingerprintType* getFilter(){
@@ -471,10 +472,11 @@ BFFTEST<ItemType, FingerprintType, HashFamily>::~BFFTEST() {
 }
 
 template <typename ItemType, typename FingerprintType, typename HashFamily>
-bool BFFTEST<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, size_t length){
+bool BFFTEST<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, size_t length, int countRuns){
 
     // Create file to write resulting singleton distribution
-    ofstream BFFTESTfile("BFFTEST.txt");
+    string filename = "BFFTEST" + to_string(countRuns) + ".txt";
+    ofstream BFFTESTfile(filename);
 
     // Check if the filter is big enough to hold the data
     if (length > this->size) {
@@ -637,7 +639,7 @@ bool BFFTEST<ItemType, FingerprintType, HashFamily>::populate(const ItemType* da
         else{
             printf("Construction failed, retrying...\n");
             //////////////////////////////////////////  
-            exit(1);
+            return false;
             //////////////////////////////////////////
         }
 
