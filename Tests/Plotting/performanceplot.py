@@ -2,7 +2,8 @@ import matplotlib.pyplot as plt
 import csv
 import numpy as np
 
-n = 1
+# Number of sizes we test for (change this if you change the size/testsize vectors in test_performance.cpp)
+n = 4
 
 # Read data from file
 size = []

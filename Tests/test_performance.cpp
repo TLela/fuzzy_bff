@@ -26,8 +26,8 @@ int main(){
     vector<double> expected_fn;
 
     // Define the size of the filter and the size of the test set
-    vector<size_t> size = {10000};//, 20000, 40000, 80000, 160000, 320000, 640000};
-    vector<size_t> testsize = {10000};//, 10000, 10000, 10000, 10000, 10000, 10000};
+    vector<size_t> size = {10000, 20000, 40000, 80000};//, 160000, 320000, 640000};
+    vector<size_t> testsize = {10000, 10000, 10000, 10000};//, 10000, 10000, 10000};
 
     // Generate data
     vector<uint64_t> data(size.back());
