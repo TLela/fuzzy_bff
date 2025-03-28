@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <vector>
 #include "hashfunction.h"
+#include <cstring>
+#include <bitset>
+
 
 
 using namespace std;
@@ -275,7 +278,6 @@ bool BFF <ItemType, FingerprintType, HashFamily>::membership(ItemType &item) {
     uint64_t hash = (*hashfunction)(item);
     FingerprintType xor2 = (FingerprintType)hash;
 
-    // TODO: want to make it faster? inline the function call and combine for all three hi values
     for(int hi = 0; hi < 3; hi++){
         size_t h = getHashFromHash(hash, hi);
         xor2 ^= filter[h];

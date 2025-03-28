@@ -8,6 +8,9 @@
 #include <unordered_set>
 #include "lsh.h"
 #include "examplelsh.h"
+#include <cstring>
+#include <bitset>
+
 
 using namespace std;
 
