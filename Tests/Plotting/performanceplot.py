@@ -114,7 +114,7 @@ plt.yscale('log')
 # Labels and title with improved font sizes
 plt.xlabel('Size', fontsize=12)
 plt.ylabel('Time (millisec.)', fontsize=12)
-plt.title('Constructiontime', fontsize=14, fontweight='bold')
+plt.title('Construction Time', fontsize=14, fontweight='bold')
 
 # Add a legend with better positioning
 plt.legend(loc='upper right', fontsize=11, frameon=True)
