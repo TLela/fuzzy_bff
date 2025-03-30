@@ -83,7 +83,7 @@ for j in range(1,4):
 #plt.yscale('log')
 
 # Labels and title with improved font sizes
-plt.xlabel('Segment index', fontsize=12)
+plt.xlabel('Segment Index', fontsize=12)
 plt.ylabel('Number of Singletons', fontsize=12)
 plt.title('Singleton Distribution During BFF Construction (Total)', fontsize=14, fontweight='bold')
 
@@ -101,4 +101,3 @@ plt.yticks(fontsize=11)
 plt.grid(True, which="both", linestyle="--", linewidth=0.5, alpha=0.7)
 
 plt.savefig('../Plots/singletonplot_overtime_total.png')
-plt.show()

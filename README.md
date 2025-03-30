@@ -1,108 +1,70 @@
-# fuzzy_bff
-Semester project
+# Fuzzy BFFs: Distance-Sensitive Binary Fuse Filters
+## Table of Contents
+- [Fuzzy BFFs: Distance-Sensitive Binary Fuse Filters](#fuzzy-bffs-distance-sensitive-binary-fuse-filters)
+  - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [Filter Classes](#filter-classes)
+    - [Binary Fuse Filter](#binary-fuse-filter)
+    - [Wrapping Binary Fuse Filter](#wrapping-binary-fuse-filter)
+    - [Fuzzy Binary Fuse Filter](#fuzzy-binary-fuse-filter)
+  - [LSH Classes](#lsh-classes)
 
-Bug in populate function - somewhere before line 225 (bff.h)
-construction fails more often than expected
+## Introduction
+This repository is part of the semester project ``Fuzzy BFFs: Distance-Sensitive Binary Fuse Filters'', completed in the Institute of Information Security at ETH Zurich. It contains implementations for the Binary fuse filter as introduced by [Graf and Lemire](https://doi.org/10.1145/3510449), a variation of this filter which we call the wrapping Binary fuse filter, and the fuzzy Binary fuse filter which was proposed as part of this project. We provide several tests to measure the performance and inner workings of these filters.
 
+## Filter Classes
+### Binary Fuse Filter
+For this class we used and adapted the original implementation by [Graf and Lemire](https://github.com/FastFilter/fastfilter_cpp/blob/master/src/xorfilter/3wise_xor_binary_fuse_filter_naive.h). There are some minor details that we changed, like how some of the involved structures are represented in the code. The one major thing we changed is the calculation of parameters (number of segments, size of segments, size of filter,...). By closely following the description of parameter calculation presented in the original paper, we were able to simplify this part of the code significantly.
 
-## How to use BFF
-
-The populate function of the filter has type: 
-```c 
-bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, size_t length)
+Run and test this class by running
+```
+g++ test_bff.cpp -o test -std=c++17 
+./test
 ```
 
-How to use BFF
+For plotting the singleton distribution overtime during the filter construction run
+```
+cd Tests
+g++ test_wrapping.cpp -o test -std=c++17 
+./test
+cd Plotting
+python3 ./singletonplot_overtime_relative.py
+python3 ./singletonplot_overtime_total.py
+```
+The plots will be available in the [Plots](https://github.com/TLela/fuzzy_bff/tree/main/Tests/Plots) folder.
 
-```cpp
-  // Define the size of the filter
-  size_t size = 100000;
+### Wrapping Binary Fuse Filter
+This class was created to showcase the importance of the ``fuse'' part of the Binary fuse filter. For the regular Binary fuse filter we simply map to three distinct segments, such that they always are in the bounds of the array. For the wrapping Binary fuse filter we consider an alternative where we first map to any segment of the array, then take the two segments consequtive to the chosen one. If they are out of bounds, we wrap around to the segments at the beginning of the array. While the construction of the Binary fuse filter succeeds nearly all the time, the construction of the wrapping version fails repeatedly. This is due to the difference in singleton distribution during the construction. Consult the write-up for more details.
 
-  // Create an object of the fuzzyBFF class
-  BFF<uint64_t, uint32_t, hashing::TwoIndependentMultiplyShift> myFilter(size);
+Compare the singleton distribution by running
+```
+cd Tests
+g++ test_wrapping.cpp -o test -std=c++17 
+./test
+cd Plotting
+python3 ./singletonplot_comparison.py
+```
+The plot will be available in the [Plots](https://github.com/TLela/fuzzy_bff/tree/main/Tests/Plots) folder.
 
-  // Print some of the initialized values (optional)
-  cout << "Filter details:" << endl;
-  cout << "Size: " << myFilter.size << endl;
-  cout << "Segment Length: " << myFilter.segmentLength << endl;
-  cout << "Segment Count: " << myFilter.segmentCount << endl;
-  cout << "Array Length: " << myFilter.arrayLength << endl;
-  cout << "Filter Length: " << myFilter.filterLength << endl;
+### Fuzzy Binary Fuse Filter
+This filter was built by combining Locality-senstive hash (LSH) functions and Binary fuse filters. Specify your desired LSH during initialisation of the filter. We implemented a Bit-sampling hash as an example. 
 
-
-  // Populate the function with keys in data
-  vector<uint64_t> data(size);
-  bool success = myFilter.populate(data, data.size());
-
-  // Get the pointer to the filter
-  uint32_t* filter = myFilter.getFilter();
-
-  // Check membership of a key
-  uint64_t key;
-  bool isMember = myFilter.membership(key);
-      
+Run the filter using the Bit-sampling hash
+```
+cd Tests
+g++ test_fuzzybff.cpp -o test -std=c++17 
+./test
 ```
 
-## How to use fuzzyBFF
-Note that here we don't need to specify the set size in advance since the size of the final set depends on the LSH we use.
-
-For debugging see `debug.cpp`. 
-Compile this file and execute it with `./debug <filtersize>`.
-
-The populate function of the filter has type: 
-```c 
-bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::populate(const InputType* data, size_t length)
+Compare the performance of the original filter with the fuzzy version
 ```
-
-How to use fuzzyBFF:
-
-```cpp
-  // Define the size of the filter
-  size_t size = 100000;
-
-  // Create an object of the fuzzyBFF class
-  fuzzyBFF<uint64_t, uint64_t, uint32_t, hashing::TwoIndependentMultiplyShift, ExampleLSH> myFilter;
-
-  // Populate the Filter with keys in data
-  vector<uint64_t> data(size);
-  bool success = myFilter.populate(data, data.size());
-
-  // Print some of the initialized values (optional)
-  cout << "Filter details:" << endl;
-  cout << "Size: " << myFilter.size << endl;
-  cout << "Segment Length: " << myFilter.segmentLength << endl;
-  cout << "Segment Count: " << myFilter.segmentCount << endl;
-  cout << "Array Length: " << myFilter.arrayLength << endl;
-  cout << "Filter Length: " << myFilter.filterLength << endl;
-
-  // Get the pointer to the filter
-  uint32_t* filter = myFilter.getFilter();
-
-  // Check membership of a key
-  uint64_t newkey;
-  bool isMember = myFilter.membership(newkey);
+cd Tests
+g++ test_performance.cpp -o test -std=c++17 
+./test
+cd Plotting
+python3 ./perfromanceplot.py
 ```
+The plots will be available in the [Plots](https://github.com/TLela/fuzzy_bff/tree/main/Tests/Plots) folder.
 
-## Worklog
-- implemented populate function and membership function
-- setup file for fuzzy bff - used std::unordered_set to remove duplicates - seems to work
-- why do we have false negatives? -> mistake in code of populate function -> solved
-- revisit fuzzy bff and check if it works -> changed initialization, now after projecting to new set using lsh
-- create lsh classes
-- fixed mistake in memb function of fuzzy bff -> now checks memb of lsh(item) instead of item
-- readme and comment on bug
-- debug -> apparently they don't wrap arount - removed wrapping around for now, decide in next meeting how to proceed
-
-Next:
-- decide on example lsh and implement 2-3 (mo)
-  - Hemming/Euclidean
-  - read up on them 
-  - write up lsh
-- test it (mo/thu)
-- set up testing environment (thu/fr)
-  - for time and space (thu/fr)
-- decide on what to compare it to (fr)
-- implement comparison(fr/tue)
-- clean up (tue/wed)
-- back to theory...
-- ...
+## LSH Classes
+There is currently only the Bit-sampling hash implemented, but one can easily implement an alternative Locality-sensitve hash (LSH) using the lsh class in [lsh.h](https://github.com/TLela/fuzzy_bff/blob/main/lsh.h).

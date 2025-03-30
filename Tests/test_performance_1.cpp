@@ -2,9 +2,9 @@
 #include <vector>
 #include <cmath>
 #include <fstream>
-#include "../fuzzy_bff.h" // Include the header file
+#include "../bff_fuzzy.h" // Include the header file
 #include "../lsh_bitsample.h"
-#include "../timer.h"
+#include "../Utils/timer.h"
 #include "../bff.h"
 
 using namespace std;
@@ -52,10 +52,9 @@ int main(){
     myfile << "Size,Testsize,Filtersize,Construction Time,Query Time FP,Query Time FN,FP count, FN count, FP expected, FN expected\n";
     for(int i = 0; i < size.size(); i++){
         for(int j = 0; j < 2*repetitions; j++){
-            myfile << size[i] << "," << testsize[i] << ","  << filtersize[6*i+j] << "," << constructiontime[6*i+j] << "," << querytime_fp[6*i+j] << "," << querytime_fn[6*i+j] << ","  << fpcount[6*i+j] << ","  << fncount[6*i+j] << "," << expected_fp[6*i+j] << "," << expected_fn[6*i+j] << endl;
+            myfile << size[i] << "," << testsize[i] << ","  << filtersize[2*repetitions*i+j] << "," << constructiontime[2*repetitions*i+j] << "," << querytime_fp[2*repetitions*i+j] << "," << querytime_fn[2*repetitions*i+j] << ","  << fpcount[2*repetitions*i+j] << ","  << fncount[2*repetitions*i+j] << "," << expected_fp[2*repetitions*i+j] << "," << expected_fn[2*repetitions*i+j] << endl;
         }
     }
-
     return 0;
 }
 
@@ -100,7 +99,6 @@ void DataGeneration(size_t maxsize, size_t maxtestsize, int r_1, int r_2, vector
                 int diff = __builtin_popcountll(candidate ^ data[j]);
                 if(diff < r_2 + 1){
                     candidate = dis(gen);
-                    //cout << "Count: " << count << endl;
                     break;
                 }
                 count++;
@@ -108,12 +106,10 @@ void DataGeneration(size_t maxsize, size_t maxtestsize, int r_1, int r_2, vector
             if(count == maxsize){
                 found = true;
                 unorderedfar_keys.insert(candidate);
-                //cout << "Found far data point: " << i << endl;
             }
         }
     }
     fardata = vector<uint64_t>(unorderedfar_keys.begin(), unorderedfar_keys.end());
-    cout << "Data generation completed." << endl;
 
 }
 
@@ -129,7 +125,6 @@ void fuzzyBFFTest(size_t size, size_t testsize, vector<size_t>& filtersize, vect
 
 
     // Get expected false positive and false negative rates
-    // print expected total fp/fn 
     BitSampleLSH lsh;
     expected_fp.push_back(testsize * (size * lsh.p_2 + pow(2,-32)));
     expected_fn.push_back(testsize * (1-(lsh.p_1 + pow(2,-32))));

@@ -13,16 +13,10 @@ public:
         and_op = 56; //increase to decrease fp; can be at most 56
         or_op = 160; //increase to decrease fn; can be at most 256
         k = 64;
-        //or_op = int(std::floor(and_op/pow(1-r_1/k,and_op))); 
 
         //resulting probabilities
         p_1 = 1 - pow(1 - pow(1 - r_1/k, and_op) , or_op);
         p_2 = 1 - pow(1 - pow(1 - r_2/k, and_op) , or_op);
-
-        std::cout << "and_op: " << and_op << std::endl;
-        std::cout << "or_op: " << or_op << std::endl;
-        std::cout << "p_1: " << p_1 << std::endl;
-        std::cout << "p_2: " << p_2 << std::endl;
 
         //sample bitmasks
         std::random_device rd;
@@ -54,7 +48,6 @@ public:
             }
             uint64_t hash_value = hash.to_ullong() | msb_value;
             result.push_back(hash_value);
-            //std::cout << "bit repr hash_value: " << bitset<64>(hash_value) << std::endl;
         }
         return result;
     }

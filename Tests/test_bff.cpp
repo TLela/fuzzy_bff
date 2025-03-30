@@ -2,7 +2,7 @@
 #include <vector>
 #include <cmath>
 #include "../bff.h" // Include the header file
-#include "../timer.h"
+#include "../Utils/timer.h"
 #include <random>
 #include <unordered_set>
 
@@ -13,9 +13,7 @@ int main() {
     // Define the size of the filter
     size_t size = 1000000;
     size_t testsize = 1000000;
-    size_t actual_testsize = testsize; // will remove elements that are in both sets (data and notinset)
 
-    
     // Create set of random keys not in the set
     vector<uint64_t> notinset(testsize);
     std::random_device rd;
@@ -28,7 +26,6 @@ int main() {
         keys.insert(dis(gen));
     }
     std::vector<uint64_t> data(keys.begin(), keys.end());
-    // vector<uint64_t> data = GenerateRandom64Fast(size, rand()) ;
     
     // Create and populate the filter
     Timer popTime;
@@ -36,9 +33,11 @@ int main() {
     bool success = myFilter.populate(data, data.size());
     double time = popTime.Stop();
     
+    cout << endl;
+    cout << "//////////Timing results://////////" << endl;
     cout << "Populate time: " << time << " microseconds total" << endl;
     cout << "Populate time:" << time/size << " microseconds per item" << endl;
-    
+    cout << endl;
     // Print some of the initialized values (optional)
     myFilter.printInfo();
     
@@ -55,42 +54,34 @@ int main() {
         if(!isMember){
             cout << "False negative: " << data[i] << endl;
             fncount++;
-  
         }
     }
-
     // Generate random keys to test for false positives
-    for (int i = 0; i < testsize; ++i) {
-        notinset[i] = dis(gen);
-    }
-    
     int fp = 0;
-    // Check membership of keys not in set
-    for (uint64_t i = 0; i < testsize; ++i) {
-        bool isMember = myFilter.membership(notinset[i]);
-        // False positive?
-        if(isMember){
-            // Check if actually a false positive
-            fp = 1;
-            for (size_t j = 0; j < size; ++j) {
-                if(notinset[i] == data[j]){
-                    // no false positive
-                    fp = 0;
-                    actual_testsize--;
-                    break;
-                }
-            }
-            if(fp == 1){
-                cout << "False positive: " << notinset[i] << endl;
-                fpcount++;
-            }
-            
+    size_t count = 0;
+    uint64_t candidate = 0;
+    while(count < testsize){
+        candidate = dis(gen);
+        // Check if candidate is in the set
+        if(keys.find(candidate) == keys.end()){
+            notinset[count] = candidate;
+            count++;
         }
     }
-
+    // Check membership of keys not in set
+    for (size_t i = 0; i < testsize; ++i) {
+        bool isMember = myFilter.membership(notinset[i]);
+        // False positive
+        if(isMember){
+            cout << "False positive: " << notinset[i] << endl;
+            fpcount++;
+        }
+    }
     // fp and fn fraction
+    cout << endl;
+    cout << "//////////Query results:///////////" << endl;
     cout << "False negative fraction: " << fncount << "/" << size << endl;
-    cout << "False positive fraction: " << fpcount << "/" << actual_testsize << endl;
+    cout << "False positive fraction: " << fpcount << "/" << testsize << endl;
 
     return 0;
 }

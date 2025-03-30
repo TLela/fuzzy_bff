@@ -9,7 +9,8 @@ void testFunction2();
 
 int main() {
     std::cout << "Running tests..." << std::endl;
-    for(int size = 0; size < 10; size+=1){
+    int count = 0;
+    for(int size = 0; size < 10000; size+=1){
         
         size_t segmentLength1 = 1L << (int)floor(log(size) / log(3.33) + 2.25);
 
@@ -30,7 +31,6 @@ int main() {
         if(segmentCount1 < 3){
             segmentCount1 = 3;
         }
-        
         // Size of the logical filter array
         size_t arrayLength1 = segmentCount1 * segmentLength1;
         
@@ -38,7 +38,7 @@ int main() {
         size_t segmentLengthMask1 = segmentLength1 - 1;
         size_t segmentCountLength1 = (segmentCount1 - 2) * segmentLength1;
 
-
+        /////////////////////////////////////////////////////////////////////
 
         int arity = 3;
         size_t segmentLength2 = 1L << (int)floor(log(size) / log(3.33) + 2.25);
@@ -59,10 +59,10 @@ int main() {
             segmentCount2 <= arity - 1 ? 1 : segmentCount2 - (arity - 1);
         arrayLength2 = (segmentCount2 + arity - 1) * segmentLength2;
         size_t segmentCountLength2 = segmentCount2 * segmentLength2;
-
-
+        
+        /////////////////////////////////////////////////////////////////////
+        
         // Compare parameters:
-
         if(capacity1!=capacity2 || segmentLength1 != segmentLength2 || arrayLength1 != arrayLength2 || segmentCount1-2 != segmentCount2 || segmentCountLength1 != segmentCountLength2) {
             std::cout << "size: " << size << std::endl;
             std::cout << "capacity: " << capacity1 << " vs " << capacity2 << std::endl;
@@ -70,6 +70,7 @@ int main() {
             std::cout << "arrayLength: " << arrayLength1 << " vs " << arrayLength2 << std::endl;
             std::cout << "segmentCount: " << segmentCount1-2 << " vs " << segmentCount2 << std::endl;
             std::cout << "segmentCountLength: " << segmentCountLength1 << " vs " << segmentCountLength2 << std::endl;
+            count++;
         } 
         // else {
         //     std::cout << "same results for both approaches" << std::endl;
@@ -80,7 +81,9 @@ int main() {
         //     std::cout << "segmentCount: " << segmentCount1-2 << std::endl;
         //     std::cout << "segmentCountLength: " << segmentCountLength1 << std::endl;
         // }
+
     }
+    std::cout << "Parameters differed for " << count << " sizes" << std::endl;
     
     return 0;
 }

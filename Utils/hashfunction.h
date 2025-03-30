@@ -1,15 +1,12 @@
 #ifndef HASHUTIL_H_
 #define HASHUTIL_H_
 
-// TODO: Used hash functions from original gitrepo - do we want to use these or implement our own?
 // See https://github.com/FastFilter/fastfilter_cpp
 
 #include <stdint.h>
 #include <stdlib.h>
 #include <sys/types.h>
-
 #include <string>
-
 #include <random>
 
 namespace hashing {

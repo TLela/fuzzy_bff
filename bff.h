@@ -1,14 +1,11 @@
 #ifndef BFF_H
 #define BFF_H
 
-// Include necessary standard libraries
 #include <stdlib.h>
 #include <vector>
-#include "hashfunction.h"
+#include "Utils/hashfunction.h"
 #include <cstring>
 #include <bitset>
-
-
 
 using namespace std;
 
@@ -56,7 +53,6 @@ public:
     // Destructor
     ~BFF();
 
-    // Public member functions
     // Populate with data in vector data
     bool populate(const vector<ItemType>& data, size_t length){
         return  populate(data.data(), length);
@@ -85,13 +81,8 @@ public:
 
     bool membership(ItemType &item);
 
-    //get hashfunction for debugging
-    HashFamily* getHashFunction(){
-        return this->hashfunction;
-    }
-
     void printInfo() {
-        cout << "Filter details:" << endl;
+        cout << "//////////Filter details://////////" << endl;
         cout << "Size:\t" << this->size << endl;
         cout << "Segment Length:\t" << this->segmentLength << endl;
         cout << "Segment Count:\t" << this->segmentCount << endl;
@@ -106,8 +97,6 @@ public:
     size_t segmentLengthMask;
     size_t segmentCountLength;
     HashFamily *hashfunction;
-
-    // Filter array
     FingerprintType* filter;
 
 };
@@ -166,16 +155,12 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
                 arrayC_count[index]++;
             }
         }
-
         // Scan through array C and add singletons to stack Q
         for(size_t i = 0; i < arrayLength; i++){
             if(arrayC_count[i] == 1){
                 stackQ[stackQ_pos++] = i;
             }
         }
-
-        
-
         // Go through stack Q and add singletons to stack P
         while(stackQ_pos > 0){
             stackQ_pos--;
@@ -187,7 +172,6 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
             if(arrayC_count[index]==1){
                 // Get the hash corresponding to the singleton at position index
                 uint64_t hash = arrayC_hash[index];
-
 
                 // Append location to stack P
                 stackP_index[stackP_pos] = index;
@@ -214,7 +198,6 @@ bool BFF<ItemType, FingerprintType, HashFamily>::populate(const ItemType* data, 
                 // Increase stack P position
                 stackP_pos++;
             }
-            
         }
 
         // Check if construction was successful

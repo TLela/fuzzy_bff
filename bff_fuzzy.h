@@ -1,16 +1,13 @@
 #ifndef fuzzyBFF_H
 #define fuzzyBFF_H
 
-// Include necessary standard libraries
 #include <stdlib.h>
 #include <vector>
-#include "hashfunction.h"
+#include "Utils/hashfunction.h"
 #include <unordered_set>
 #include "lsh.h"
-#include "examplelsh.h"
 #include <cstring>
 #include <bitset>
-
 
 using namespace std;
 
@@ -19,7 +16,6 @@ class fuzzyBFF {
 public:
     // Constructor
     fuzzyBFF() {
-
         //Check if LSHType InputType and ItemType are compatible with fuzzyBFF InputType and ItemType
         static_assert(std::is_base_of<LSH<InputType, ItemType>, LSHType>::value, "LSHType must be derived from LSH<InputType, ItemType>");
 
@@ -27,9 +23,7 @@ public:
         this->segmentLength = 0;
         this->arrayLength = 0;
         this->segmentCount = 0;
-        //this->hashfunction = new HashFamily();
         this->filter = nullptr;
-        //this->lsh = LSHType();
     }
 
     // Destructor
@@ -69,8 +63,9 @@ public:
     void deleteFilter() {
         delete[] this->filter;
     }
-
+    
     void printInfo() {
+        cout << "//////////Filter details://////////" << endl;
         cout << "Filter details:" << endl;
         cout << "Size:\t" << this->size << endl;
         cout << "Segment Length:\t" << this->segmentLength << endl;
@@ -106,7 +101,6 @@ private:
         this->arrayLength = factor * size;
 
         // We need to fit an integer number of segments in the filter
-        //TODO: Check if +2 is what we want
         this->segmentCount = ((this->arrayLength + this->segmentLength - 1) / this->segmentLength);
 
         // For very small set sizes
@@ -179,7 +173,6 @@ bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::popula
     // Initialize xor value
     FingerprintType xor2 = 0;
 
-    
     while (true) {
         memset(arrayC_hash, 0, sizeof(uint64_t[arrayLength]));
         memset(arrayC_count, 0, sizeof(size_t[arrayLength]));
@@ -196,15 +189,12 @@ bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::popula
                 arrayC_count[index]++;
             }
         }
-
         // Scan through array C and add singletons to stack Q
         for (size_t i = 0; i < arrayLength; i++) {
             if (arrayC_count[i] == 1) {
                 stackQ[stackQ_pos++] = i;
             }
         }
-        
-
         // Go through stack Q and add singletons to stack P
         while (stackQ_pos > 0) {
             stackQ_pos--;
@@ -243,7 +233,6 @@ bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::popula
                 stackP_pos++;
             }
         }
-
         // Check if construction was successful
         if (stackP_pos == size) {
             printf("Construction successful\n");
@@ -251,7 +240,6 @@ bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::popula
         } else {
             printf("Construction failed, retrying...\n");
         } 
-        
         // If not, generate new hash functions
         delete hashfunction;
         hashfunction = new HashFamily();
@@ -324,7 +312,6 @@ bool fuzzyBFF<InputType, ItemType, FingerprintType, HashFamily, LSHType>::member
     }
     // none of the lsh_keys are in filter, return false
     return false;
-    
 }
 
 #endif // FUZZY_BFF_H
