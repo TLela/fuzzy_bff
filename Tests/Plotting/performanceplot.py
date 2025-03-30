@@ -4,8 +4,8 @@ import numpy as np
 
 # Adjust accordingly if you change the number of runs in test_performance.cpp
 # Number of sizes we test for (change this if you change the size/testsize vectors in test_performance.cpp)
-n = 2
-reps = 2
+n = 10
+reps = 5
 
 # Read data from file
 size = []
@@ -26,7 +26,6 @@ fn_expected_fuzzy = []
 fp_expected = []
 fn_expected = []
 
-# TODO: change path
 with open('../Results/compare_BFF_fBFF.txt', 'r') as file:
     reader = csv.reader(file)
     next(file)  # Skip the first line
@@ -101,7 +100,28 @@ with open('../Results/compare_BFF_fBFF.txt', 'r') as file:
                 fn_temp = 0
 
 
+# print factor of filtersize
+sum = 0
+for i in range(len(filtersize_fuzzy)):
+    sum += filtersize_fuzzy[i]/filtersize[i]
+print("Average filter size factor: ", sum/len(filtersize_fuzzy))
 
+# print factor of constructiontime
+sum = 0
+for i in range(len(constructiontime_fuzzy)):
+    sum += constructiontime_fuzzy[i]/constructiontime[i]
+print("Average construction factor: ", sum/len(constructiontime_fuzzy))
+
+# print factor of querytime
+sum = 0
+for i in range(len(querytime_fp_fuzzy)):
+    sum += querytime_fp_fuzzy[i]/querytime_fp[i]
+print("Average query time nonmembers factor: ", sum/len(querytime_fp_fuzzy))
+# print factor of querytime
+sum = 0
+for i in range(len(querytime_fn_fuzzy)):
+    sum += querytime_fn_fuzzy[i]/querytime_fn[i]
+print("Average query time members factor: ", sum/len(querytime_fn_fuzzy))
 
 # Create the figure and axis
 plt.figure(figsize=(10, 6))
@@ -160,10 +180,10 @@ plt.savefig("../Plots/Filtersize.png")
 plt.figure(figsize=(10, 6))
 
 # Plot with markers and linewidth
-plt.plot(size, querytime_fn, label='Member Element - BFF', linestyle='-', linewidth=2, markersize=5, color='#1f77b4')
 plt.plot(size, querytime_fn_fuzzy, label='Member Element - fBFF',  linestyle='-', linewidth=2, markersize=5, color='#ff7f0e')
-plt.plot(size, querytime_fp, label='Not Member Element - BFF', linestyle='-', linewidth=2, markersize=5, color='#2ca02c')
 plt.plot(size, querytime_fp_fuzzy, label='Not Member Element - fBFF',  linestyle='-', linewidth=2, markersize=5, color='#d62728')
+plt.plot(size, querytime_fn, label='Member Element - BFF', linestyle='-', linewidth=2, markersize=5, color='#1f77b4')
+plt.plot(size, querytime_fp, label='Not Member Element - BFF', linestyle='-', linewidth=2, markersize=5, color='#2ca02c')
 
 # Log scale for y-axis
 plt.yscale('log')
