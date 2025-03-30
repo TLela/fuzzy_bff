@@ -10,7 +10,7 @@
   - [LSH Classes](#lsh-classes)
 
 ## Introduction
-This repository is part of the semester project ``Fuzzy BFFs: Distance-Sensitive Binary Fuse Filters'', completed in the Institute of Information Security at ETH Zurich. It contains implementations for the Binary fuse filter as introduced by [Graf and Lemire](https://doi.org/10.1145/3510449), a variation of this filter which we call the wrapping Binary fuse filter, and the fuzzy Binary fuse filter which was proposed as part of this project. We provide several tests to measure the performance and inner workings of these filters.
+This repository is part of the semester project 'Fuzzy BFFs: Distance-Sensitive Binary Fuse Filters', completed at the Institute of Information Security at ETH Zurich. It contains implementations for the Binary fuse filter as introduced by [Graf and Lemire](https://doi.org/10.1145/3510449), a variation of this filter which we call the wrapping Binary fuse filter, and the fuzzy Binary fuse filter which was proposed as part of this project. We provide several tests to measure the performance and reveal the inner workings of these filters.
 
 ## Filter Classes
 ### Binary Fuse Filter
@@ -22,7 +22,7 @@ g++ test_bff.cpp -o test -std=c++17
 ./test
 ```
 
-For plotting the singleton distribution overtime during the filter construction run
+For plotting the singleton distribution overtime during the filter construction, run
 ```
 cd Tests
 g++ test_wrapping.cpp -o test -std=c++17 
@@ -34,7 +34,7 @@ python3 ./singletonplot_overtime_total.py
 The plots will be available in the [Plots](https://github.com/TLela/fuzzy_bff/tree/main/Tests/Plots) folder.
 
 ### Wrapping Binary Fuse Filter
-This class was created to showcase the importance of the ``fuse'' part of the Binary fuse filter. For the regular Binary fuse filter we simply map to three distinct segments, such that they always are in the bounds of the array. For the wrapping Binary fuse filter we consider an alternative where we first map to any segment of the array, then take the two segments consequtive to the chosen one. If they are out of bounds, we wrap around to the segments at the beginning of the array. While the construction of the Binary fuse filter succeeds nearly all the time, the construction of the wrapping version fails repeatedly. This is due to the difference in singleton distribution during the construction. Consult the write-up for more details.
+This class was created to showcase the importance of the 'fuse' part of the Binary fuse filter. For the regular Binary fuse filter we simply map to three distinct segments such that they always are in the bounds of the array. For the wrapping Binary fuse filter we consider an alternative where we first map to any segment of the array, then add the two consequtive ones. If they are out of bounds, we wrap around to the segments at the beginning of the array. While the construction of the Binary fuse filter succeeds nearly all the time, the construction of the wrapping version fails repeatedly. This is due to the difference in singleton distribution during the construction. Consult the write-up for more details.
 
 Compare the singleton distribution by running
 ```
