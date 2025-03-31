@@ -4,7 +4,7 @@ import numpy as np
 
 # Adjust accordingly if you change the number of runs in test_performance.cpp
 # Number of sizes we test for (change this if you change the size/testsize vectors in test_performance.cpp)
-n = 10
+n = 6
 reps = 5
 
 # Read data from file

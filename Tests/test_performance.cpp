@@ -29,8 +29,8 @@ int main(){
     vector<double> expected_fn;
 
     // Define the size of the filter and the size of the test set
-    vector<size_t> size = {350000, 400000, 450000, 500000};
-    vector<size_t> testsize = {10000, 10000, 10000, 10000};
+    vector<size_t> size = {50000, 100000, 150000, 200000, 250000, 300000};//, 350000, 400000, 450000, 500000};
+    vector<size_t> testsize = {10000, 10000, 10000, 10000, 10000, 10000};//, 10000, 10000, 10000, 10000};
 
     // Generate data
     vector<uint64_t> data(size.back());
@@ -48,7 +48,7 @@ int main(){
     }
 
     // write results to file
-    ofstream myfile("Results/compare_BFF_fBFF_2.txt");
+    ofstream myfile("Results/compare_BFF_fBFF.txt");
     myfile << "Size,Testsize,Filtersize,Construction Time,Query Time FP,Query Time FN,FP count, FN count, FP expected, FN expected\n";
     for(int i = 0; i < size.size(); i++){
         for(int j = 0; j < 2*repetitions; j++){
